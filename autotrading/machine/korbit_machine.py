@@ -1,7 +1,7 @@
-from base_machine import Machine
+from .base_machine import Machine
 import configparser
 
-class KorbitMachine:
+class KorbitMachine(Machine):
     """
     코빗 거래소와의 거래를 위한 클래스
     BASE_API_URL은 API 호출을 위한 기본 URL
