@@ -132,3 +132,5 @@ conf/*
 *.pyc
 *.log
 *.ipynb
+
+config/config.ini
