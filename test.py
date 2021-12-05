@@ -39,12 +39,12 @@ async def upbit_ws_client():
                 "codes": ticker_list,
                 "isOnlyRealtime": True
             },
-            # {
-            #     "type": "orderbook",
-            #     "codes": ticker_list,
-            #     "isOnlyRealtime": True
-            # },
-            # {"format":"SIMPLE"}
+            {
+                "type": "orderbook",
+                "codes": ticker_list,
+                "isOnlyRealtime": True
+            },
+            {"format":"SIMPLE"}
         ]
         subscribe_data = json.dumps(subscribe_fmt)
         await websocket.send(subscribe_data)
