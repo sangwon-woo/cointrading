@@ -7,45 +7,24 @@ import pandas as pd
 import time
 
 
-url = "https://api.upbit.com/v1/market/all?isDetails=false"
 
-headers = {"Accept": "application/json"}
-
-response = requests.request("GET", url, headers=headers)
-
-count = 0
-ticker_list = []
-for res in response.json():
-    ticker = res['market']
-    if ticker.startswith('KRW'):
-        ticker_list.append(ticker)
-
-df = pd.DataFrame()
-
-async def upbit_ws_client():
-    global df
-    uri = "wss://api.upbit.com/websocket/v1"
+async def korbit_ws_client():
+    uri = "wss://ws.korbit.co.kr/v1/user/push"
 
     async with websockets.connect(uri) as websocket:
-        subscribe_fmt = [ 
-            {"ticket":"UNIQUE_TICKET"},
-            # {
-            #     "type": "ticker",
-            #     "codes": ticker_list,
-            #     "isOnlyRealtime": True
-            # },
-            {
-                "type": "trade",
-                "codes": ticker_list,
-                "isOnlyRealtime": True
-            },
-            # {
-            #     "type": "orderbook",
-            #     "codes": ticker_list,
-            #     "isOnlyRealtime": True
-            # },
-            # {"format":"SIMPLE"}
-        ]
+        subscribe_fmt = {
+            "accessToken":"o4vMmtqOUVMgVVndi5li3w6Y1eh7Z5qxadSO429WUplGXkDHmJivlbt3SvXvy",
+            "timestamp":int(time.time()),
+            "event":"korbit:subscribe",
+            "data":{
+                # "channels":[
+                #     "ticker:btc_krw",
+                #     "orderbook:btc_krw",
+                #     "transaction:btc_krw"
+                # ]
+                "channels":["ticker"]
+            }
+        }
         subscribe_data = json.dumps(subscribe_fmt)
         await websocket.send(subscribe_data)
         
@@ -58,7 +37,6 @@ async def upbit_ws_client():
             print(data)
 
 async def main():
-    await upbit_ws_client()
+    await korbit_ws_client()
 
 asyncio.run(main())
-print(df)

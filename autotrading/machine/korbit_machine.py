@@ -18,12 +18,12 @@ class KorbitMachine:
         config.ini에서 client_id, client_secret, username, password 정보를 읽어옴
         """
         config = configparser.ConfigParser()
-        config.read('conf/config.ini')
+        config.read('config/config.ini')
 
-        self.CLIENT_ID = config['KORBIT']['client_id']
-        self.CLIENT_SECRET = config['KORBIT']['client_secret']
-        self.USER_NAME = config['KORBIT']['username']
-        self.PASSWORD = config['KORBIT']['password']
+        self.CLIENT_ID = config['korbit']['client_id']
+        self.CLIENT_SECRET = config['korbit']['client_secret']
+        self.USER_NAME = config['korbit']['username']
+        self.PASSWORD = config['korbit']['password']
         self.access_token = None
         self.refresh_token = None
         self.token_type = None
