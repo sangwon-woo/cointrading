@@ -70,3 +70,9 @@ class QuotationAPI(UpbitMachine):
         super().__init__()
 
 
+class WebsocketAPI(UpbitMachine):
+    """
+    업비트 API 중 Websocket과 관련된 API
+    """
+    def __init__(self) -> None:
+        super().__init__()
