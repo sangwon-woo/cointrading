@@ -47,9 +47,26 @@ class ExchangeAPI(UpbitMachine):
     """
     def __init__(self) -> None:
         super().__init__()
-        
 
-class QuotationAPI:
+
+class QuotationAPI(UpbitMachine):
+    """
+    업비트 API 중 Quotation과 관련된 API
+    1. 시세 종목 조회
+        - 마켓 코드 조회 : 업비트에서 거래 가능한 마켓 목록
+    2. 시세 캔들 조회
+        - 분 캔들 : 분 캔들 조회
+        - 일 캔들 : 일 캔들 조회
+        - 주 캔들 : 주 캔들 조회
+        - 월 캔들 : 월 캔들 조회
+    3. 시세 체결 조회
+        - 최근 체결 내역 : 체결 내역 조회
+    4. 시세 Ticker 조회
+        - 현재가 정보 : 요청 당시 종목의 스냅샷 조회
+    5. 시세 호가 정보 조회
+        - 호가 정보 조회 : 요청 당시 종목의 호가 정보 조회(1호가부터 15호가까지)
+    """
     def __init__(self) -> None:
-        pass
+        super().__init__()
+
 
