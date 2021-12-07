@@ -75,6 +75,14 @@ class QuotationAPI(UpbitMachine):
         }
 
     def get_market_code(self, is_details=False) -> pd.DataFrame:
+        """
+        업비트에서 거래 가능한 마켓 목록 조회
+        
+        Parameters
+        ----------
+        is_details : Bool
+            유의종목 필드와 같은 상세 정보 노출 여부. 기본값은 False
+        """
         df = pd.DataFrame()
         is_details = 'false' if is_details == False else 'true'
         url = self.BASE_API_URL + '/market/all?isDetails={}'.format(is_details)
