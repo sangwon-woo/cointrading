@@ -175,8 +175,42 @@ class QuotationAPI(UpbitMachine):
         
         return df
 
-    def get_week_candle(self):
-        pass
+    def get_week_candle(self, market='KRW-BTC', to=None, count=1):
+        """
+        특정 화폐의 주봉 조회
+        
+        Parameters
+        ----------
+        market : string
+            마켓 코드. 기본값은 KRW-BTC
+        to : string
+            마지막 캔들 시각(exclusive). 기본값은 None
+            포맷 : yyyy-MM-dd HH:mm:ss
+        count : int
+            캔들 갯수. 기본값은 1. 최대 200개까지 요청 가능. 
+        """
+
+        df = pd.DataFrame()
+        base_url = self.BASE_API_URL + '/candles/weeks?'
+
+        if to:
+            print('{}보다 이전 월봉 데이터 조회'.format(to))
+            to = to.replace(' ', '%20').replace(':', '%3A')
+            query = 'market={}&to={}&count={}'.format(market, to, count)
+        else:
+            query = 'market={}&count={}'.format(market, count)
+
+        url = base_url + query
+
+        ### try - except
+        res = rq.get(url, headers=self.headers).json()
+        time.sleep(0.1)
+
+        for i in range(len(res)):
+            dict_row = res[i]
+            df = df.append(dict_row, ignore_index=True)
+        
+        return df        
 
     def get_month_candle(self):
         pass
