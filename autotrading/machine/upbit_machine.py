@@ -121,7 +121,7 @@ class QuotationAPI(UpbitMachine):
         res = rq.get(url, headers=self.headers).json()
         time.sleep(0.1)
 
-        for i in range(count):
+        for i in range(len(res)):
             dict_row = res[i]
             df = df.append(dict_row, ignore_index=True)
         
@@ -169,7 +169,7 @@ class QuotationAPI(UpbitMachine):
         res = rq.get(url, headers=self.headers).json()
         time.sleep(0.1)
 
-        for i in range(count):
+        for i in range(len(res)):
             dict_row = res[i]
             df = df.append(dict_row, ignore_index=True)
         
