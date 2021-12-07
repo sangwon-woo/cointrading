@@ -114,7 +114,7 @@ class QuotationAPI(UpbitMachine):
 
         url = base_url + query
 
-        res = rq.get(url, headers=self.headers)
+        res = rq.get(url, headers=self.headers).json()
         time.sleep(0.1)
 
         for i in range(count):
