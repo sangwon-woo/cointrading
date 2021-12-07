@@ -1,8 +1,10 @@
 import requests as rq
-from requests.api import head
-import config.setting as st
+import websockets
 import pandas as pd
 import time
+import json
+import config.setting as st
+
 
 class UpbitMachine:
     """
@@ -303,7 +305,7 @@ class QuotationAPI(UpbitMachine):
 
             df = df.append(temp_df, ignore_index=True)
             df = df.reset_index(drop=True)
-            
+
         return df
 
 
@@ -311,6 +313,107 @@ class QuotationAPI(UpbitMachine):
 class WebsocketAPI(UpbitMachine):
     """
     업비트 API 중 Websocket과 관련된 API
+    Websocket을 이용하여 수신할 수 있는 정보는 다음과 같다.
+    1. 현재가(스냅샷, 실시간 정보 제공)
+    2. 체결(스냅샷, 실시간 정보 제공)
+    3. 호가(스냅샷, 실시간 정보 제공)
+
+    스냅샷 정보는 요청 당시의 상태를 의미한다.
+    실시간 정보는 요청 정보가 스트림 형태로 제공된다.
+
+    요청은 JSON Object를 이용하며, 응답 또한 JSON Object다.
+    요청의 형태는 아래와 같다.
+    request = [
+        {ticket field},
+        {type field}, 
+        {format field}
+    ]
+
+    Field
+    -----
+    1. Ticket Field
+        용도를 식별하기 위해 ticket이라는 필드값이 필요하다.
+        이 값은 시세를 수신하는 대상을 식별하며, 유니크한 값을 사용하도록 권장한다.(UUID 등)
+    ticket : string
+        식별값. 반드시 필요하다.
+
+    2. Type Field
+        수신하고 싶은 시세 정보를 나열하는 필드값이다. 
+        isOnlySnapshot, isOnlyRealtime 필드는 생략가능하며 모두 생략시 스냅샷과 실시간
+        데이터 모두를 수신한다.
+        하나의 요청에 {type filed}는 여러 개를 명시할 수 있다.
+    type : string
+        수신할 시세 타입. 현재가(ticker), 체결(trade), 호가(orderbook)
+    codes : list
+        수신할 시세 종목. 대문자로 요청해야 함.
+    isOnlySnapshot : Boolean
+        시세 스냅샷만 제공
+    isOnlyRealtime : Boolean
+        실시간 시세만 제공
+
+    3. Format Field
+        Simple로 지정될 경우 응답의 필드명이 간소화됨. 
+    format : string
+        포맷. 
+
     """
+
+
     def __init__(self) -> None:
         super().__init__()
+        self.BASE_WEBSOCKET_URL = 'wss://api.upbit.com/websocket/v1'
+        self.subscribe_format = None
+
+    def set_subscribe_format(self, ticket_field='test', format_field=None, *type_field):
+        
+        _ticket = 'test' if ticket_field == 'test' else 'SIMPLE'
+
+        if format_field:
+            assert format_field != 'SIMPLE' 'Wrong format code'
+            _format = {
+                'format' : format_field
+            }
+
+        subscribe_format = [
+                _ticket,
+                *type_field,
+                _format
+            ]
+
+        return subscribe_format
+
+            
+
+    async def subscribe_websocket(self):
+        async with websockets.connect(self.BASE_WEBSOCKET_URL) as ws:
+            subscribe_fmt = [ 
+                {"ticket":"UNIQUE_TICKET"},
+                # {
+                #     "type": "ticker",
+                #     "codes": ticker_list,
+                #     "isOnlyRealtime": True
+                # },
+                {
+                    "type": "trade",
+                    # "codes": ticker_list,
+                    "codes" : ['KRW-BTC'],
+                    "isOnlyRealtime": True
+                },
+                # {
+                #     "type": "orderbook",
+                #     "codes": ticker_list,
+                #     "isOnlyRealtime": True
+                # },
+                # {"format":"SIMPLE"}
+            ]
+            subscribe_data = json.dumps(subscribe_fmt)
+            await ws.send(subscribe_data)
+            
+            a = 0
+            while True:
+                data = await ws.recv()
+                data = json.loads(data)
+                # df = df.append(data, ignore_index=True)
+                # a += 1
+                print(data)
+    
