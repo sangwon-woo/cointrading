@@ -74,9 +74,12 @@ class QuotationAPI(UpbitMachine):
             'Accept' : 'application/json'
         }
 
-    def get_market_code(self, isDetails='false') -> pd.DataFrame:
+    def get_market_code(self, is_details=False) -> pd.DataFrame:
         df = pd.DataFrame()
-        url = self.BASE_API_URL + '/market/all?isDetails={}'.format(isDetails)
+        is_details = 'false' if is_details == False else 'true'
+        url = self.BASE_API_URL + '/market/all?isDetails={}'.format(is_details)
+
+        ### try - except
         res = rq.get(url, headers=self.headers)
         time.sleep(0.1)
 
@@ -87,7 +90,7 @@ class QuotationAPI(UpbitMachine):
 
     def get_minute_candle(self, unit=1, market='KRW-BTC', to=None, count=1) -> pd.DataFrame:
         """
-        특정 종목의 분봉 조회
+        특정 화폐의 분봉 조회
         
         Parameters
         ----------
@@ -100,7 +103,7 @@ class QuotationAPI(UpbitMachine):
             마지막 캔들 시각(exclusive). 기본값은 None 
             포맷 : yyyy-MM-dd HH:mm:ss
         count : int
-            캔들 갯수. 기본값은 1. 최대 200개 까지 요청 가능. 
+            캔들 갯수. 기본값은 1. 최대 200개까지 요청 가능. 
         """
         df = pd.DataFrame()
         base_url = self.BASE_API_URL + '/candles/minutes/{}?'.format(unit)
@@ -114,17 +117,63 @@ class QuotationAPI(UpbitMachine):
 
         url = base_url + query
 
+        ### try - except
         res = rq.get(url, headers=self.headers).json()
         time.sleep(0.1)
 
         for i in range(count):
             dict_row = res[i]
-            df.append(dict_row, ignore_index=True)
+            df = df.append(dict_row, ignore_index=True)
         
         return df
 
-    def get_day_candle(self):
-        pass
+    def get_day_candle(self, market='KRW-BTC', to=None, count=1, converting_price_unit=None) -> pd.DataFrame:
+        """
+        특정 화폐의 일봉 조회
+        
+        Parameters
+        ----------
+        market : string
+            마켓 코드. 기본값은 KRW-BTC
+        to : string
+            마지막 캔들 시각(exclusive). 기본값은 None
+            포맷 : yyyy-MM-dd HH:mm:ss
+        count : int
+            캔들 갯수. 기본값은 1. 최대 200개까지 요청 가능. 
+        converting_price_unit : string
+            원화 마켓이 아닌 다른 마켓의 일봉 요청시 종가를 명시된 파라미터 값으로 환산. 기본값은 None.
+            현재는 원화(KRW)로 변환하는 기능만 제공하며 추후 기능을 확장할 수 있음. 
+        """
+        df = pd.DataFrame()
+        base_url = self.BASE_API_URL + '/candles/days?'
+
+        if to:
+            if converting_price_unit:
+                print('{}보다 이전 일봉 데이터 및 {}로 환산하여 조회'.format(to, converting_price_unit))
+                to = to.replace(' ', '%20').replace(':', '%3A')
+                query = 'market={}&to={}&count={}&convertingPriceUnit={}'.format(market, to, count, converting_price_unit)
+            else:
+                print('{}보다 이전 일봉 데이터 조회'.format(to))
+                to = to.replace(' ', '%20').replace(':', '%3A')
+                query = 'market={}&to={}&count={}'.format(market, to, count)
+        else:
+            if converting_price_unit:
+                print('{}로 환산하여 조회'.format(converting_price_unit))
+                query = 'market={}&count={}&convertingPriceUnit={}'.format(market, count, converting_price_unit)
+            else:
+                query = 'market={}&count={}'.format(market, count)
+
+        url = base_url + query
+
+        ### try - except
+        res = rq.get(url, headers=self.headers).json()
+        time.sleep(0.1)
+
+        for i in range(count):
+            dict_row = res[i]
+            df = df.append(dict_row, ignore_index=True)
+        
+        return df
 
     def get_week_candle(self):
         pass
