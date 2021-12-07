@@ -1,5 +1,7 @@
-import requests
+import requests as rq
 import config.setting as st
+import pandas as pd
+import time
 
 class UpbitMachine:
     """
@@ -68,6 +70,77 @@ class QuotationAPI(UpbitMachine):
     """
     def __init__(self) -> None:
         super().__init__()
+        self.headers = {
+            'Accept' : 'application/json'
+        }
+
+    def get_market_code(self, isDetails='false') -> pd.DataFrame:
+        df = pd.DataFrame()
+        url = self.BASE_API_URL + '/market/all?isDetails={}'.format(isDetails)
+        res = rq.get(url, headers=self.headers)
+        time.sleep(0.1)
+
+        for dict_row in res.json():
+            df = df.append(dict_row, ignore_index=True)
+
+        return df
+
+    def get_minute_candle(self, unit=1, market='KRW-BTC', to=None, count=1) -> pd.DataFrame:
+        """
+        특정 종목의 분봉 조회
+        
+        Parameters
+        ----------
+        unit : int
+            분봉의 단위. 기본값은 1
+            가능한 값 : 1, 3, 5, 10, 15, 30, 60, 240
+        market : string
+            마켓 코드. 기본값은 KRW-BTC
+        to : string
+            마지막 캔들 시각(exclusive). 기본값은 None 
+            포맷 : yyyy-MM-dd HH:mm:ss
+        count : int
+            캔들 갯수. 기본값은 1. 최대 200개 까지 요청 가능. 
+        """
+        df = pd.DataFrame()
+        base_url = self.BASE_API_URL + '/candles/minutes/{}?'.format(unit)
+
+        if to:
+            print('{}보다 이전 {}분봉 데이터 조회'.format(to, unit))
+            to = to.replace(' ', '%20').replace(':', '%3A')
+            query = 'market={}&to={}&count={}'.format(market, to, count)
+        else:
+            query = 'market={}&count={}'.format(market, count)
+
+        url = base_url + query
+
+        res = rq.get(url, headers=self.headers)
+        time.sleep(0.1)
+
+        for i in range(count):
+            dict_row = res[i]
+            df.append(dict_row, ignore_index=True)
+        
+        return df
+
+    def get_day_candle(self):
+        pass
+
+    def get_week_candle(self):
+        pass
+
+    def get_month_candle(self):
+        pass
+
+    def get_transactions(self):
+        pass
+
+    def get_ticker(self):
+        pass
+
+    def get_orderbook(self):
+        pass
+
 
 
 class WebsocketAPI(UpbitMachine):
