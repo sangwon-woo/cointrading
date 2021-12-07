@@ -1,4 +1,5 @@
 import requests as rq
+from requests.api import head
 import config.setting as st
 import pandas as pd
 import time
@@ -257,14 +258,53 @@ class QuotationAPI(UpbitMachine):
         
         return df 
 
-    def get_transactions(self):
+    def get_transactions(self, market='KRW-BTC', to=None, count=1, cursor=None, days_ago=None):
         pass
 
-    def get_ticker(self):
+    def get_ticker(self, market='KRW-BTC'):
         pass
 
-    def get_orderbook(self):
-        pass
+    def get_orderbook(self, markets=['KRW-BTC']):
+
+        df = pd.DataFrame()
+        base_url = self.BASE_API_URL + '/orderbook?'
+
+        if len(markets) > 1:
+            params = '%2C%20'.join(markets)
+            query = 'markets={}'.format(params)
+        else:
+            params = markets[0]
+            query = 'markets={}'.format(params)
+        
+        url = base_url + query
+
+        ### try - except
+        res = rq.get(url, headers=self.headers).json()
+        time.sleep(0.1)
+
+        for market_idx in range(len(res)):
+            market_orderbook = res[market_idx]
+
+            market = market_orderbook['market']
+            timestamp = market_orderbook['timestamp']
+            total_ask_size = market_orderbook['total_ask_size']
+            total_bid_size = market_orderbook['total_bid_size']
+            orderbook_units = market_orderbook['orderbook_units']
+
+            temp_df = pd.DataFrame()
+
+            for orderbook_units_idx in range(len(orderbook_units)):
+                temp_df = temp_df.append(orderbook_units[orderbook_units_idx], ignore_index=True)
+
+            temp_df['market'] = market
+            temp_df['timestamp'] = timestamp
+            temp_df['total_ask_size'] = total_ask_size
+            temp_df['total_bid_size'] = total_bid_size
+
+            df = df.append(temp_df, ignore_index=True)
+            df = df.reset_index(drop=True)
+            
+        return df
 
 
 
