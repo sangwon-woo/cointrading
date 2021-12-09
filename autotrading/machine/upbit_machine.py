@@ -364,56 +364,42 @@ class WebsocketAPI(UpbitMachine):
         self.BASE_WEBSOCKET_URL = 'wss://api.upbit.com/websocket/v1'
         self.subscribe_format = None
 
-    def set_subscribe_format(self, ticket_field='test', format_field=None, *type_field):
+    def set_subscribe_format(self, *type_field, ticket_field='UNIQUE_TICKET', format_field=None ):
         
-        _ticket = 'test' if ticket_field == 'test' else 'SIMPLE'
-
+        _ticket = {
+            'ticket' : ticket_field if ticket_field != 'test' else 'test '
+        }
         if format_field:
             assert format_field != 'SIMPLE' 'Wrong format code'
             _format = {
                 'format' : format_field
             }
 
-        subscribe_format = [
+            subscribe_format = [
                 _ticket,
                 *type_field,
                 _format
             ]
+        else:
+            subscribe_format = [
+                _ticket,
+                *type_field,
+            ]
 
-        return subscribe_format
+        print(subscribe_format)
+        
+        self.subscribe_format = subscribe_format
 
-            
+    async def run_websocket(self):
+        await self.subscribe_websocket()
 
     async def subscribe_websocket(self):
         async with websockets.connect(self.BASE_WEBSOCKET_URL) as ws:
-            subscribe_fmt = [ 
-                {"ticket":"UNIQUE_TICKET"},
-                # {
-                #     "type": "ticker",
-                #     "codes": ticker_list,
-                #     "isOnlyRealtime": True
-                # },
-                {
-                    "type": "trade",
-                    # "codes": ticker_list,
-                    "codes" : ['KRW-BTC'],
-                    "isOnlyRealtime": True
-                },
-                # {
-                #     "type": "orderbook",
-                #     "codes": ticker_list,
-                #     "isOnlyRealtime": True
-                # },
-                # {"format":"SIMPLE"}
-            ]
-            subscribe_data = json.dumps(subscribe_fmt)
+            subscribe_data = json.dumps(self.subscribe_format)
             await ws.send(subscribe_data)
             
-            a = 0
             while True:
                 data = await ws.recv()
                 data = json.loads(data)
-                # df = df.append(data, ignore_index=True)
-                # a += 1
                 print(data)
     
