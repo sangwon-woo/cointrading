@@ -1,4 +1,3 @@
-from typing import AsyncIterable
 import autotrading.machine.upbit_machine as m
 import asyncio
 
@@ -29,4 +28,5 @@ type_field = [
     {"type":"ticker", "codes":["KRW-EOS"]}
 ]
 web.set_subscribe_format(*type_field, ticket_field='UNIQUE_TICKET', format_field='SIMPLE')
+web.store_data()
 asyncio.run(web.run_websocket())
