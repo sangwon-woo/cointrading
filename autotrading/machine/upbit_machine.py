@@ -55,6 +55,64 @@ class ExchangeAPI(UpbitMachine):
     def __init__(self) -> None:
         super().__init__()
 
+    def get_accounts(self):
+        pass
+
+    def get_orders_chance(self):
+        pass
+
+    def get_order(self, uuid, identifier):
+        pass
+
+    def get_order_list(self):
+        pass
+
+    def delete_order(self, uuid, identifier):
+        pass
+
+    def post_order(self, market:str, side:str, volume:str, price:str, ord_type:str, identifier:str):
+        body = dict()
+        pass
+
+    def get_coin_addresses(self):
+        pass
+
+    def get_coin_address(self, currency, deposit_address, secondary_address):
+        pass
+
+    def get_deposit(self, uuid, txid, currency):
+        pass
+
+    def get_deposit_list(self, currency, state, uuids, txids, limit, page, order_by):
+        pass
+
+    def post_generate_coin_address(self, currency):
+        pass
+
+    def post_krw_deposit(self, amount):
+        pass
+
+    def get_withdraws_chance(self):
+        pass
+
+    def get_withdraw(self, uuid, txid, currency):
+        pass
+
+    def get_withdraw_list(self, currency, state, uuids, txids, limit, page, order_by):
+        pass
+
+    def post_coin_withdraw(self, currency, amount, address, secondary_address, transaction_type):
+        pass
+
+    def post_krw_withdraw(self, amount):
+        pass
+
+    def get_wallet_status(self):
+        pass
+
+    def get_api_keys(self):
+        pass
+
 
 class QuotationAPI(UpbitMachine):
     """
