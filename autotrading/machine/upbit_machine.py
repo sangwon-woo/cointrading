@@ -6,6 +6,7 @@ import json
 import config.setting as st
 from autotrading.data_engine.data_queue import ClosableQueue
 from multiprocessing import Process
+import asyncio
 
 
 class UpbitMachine:
@@ -424,7 +425,9 @@ class WebsocketAPI(UpbitMachine):
         self.BASE_WEBSOCKET_URL = 'wss://api.upbit.com/websocket/v1'
         self.subscribe_format = None
         self.data_queue = ClosableQueue()
-        self.proc = Process(target=self.get_data, args=(self.data_queue))
+        self.proc = Process(target=self.get_data(), args=(self,), name='Data Consumer')
+        self.proc.start()
+        self.proc.join()
 
     def set_subscribe_format(self, *type_field, ticket_field='UNIQUE_TICKET', format_field=None ):
         
@@ -461,15 +464,16 @@ class WebsocketAPI(UpbitMachine):
             while True:
                 data = await ws.recv()
                 data = json.loads(data)
+                print(data)
                 self.data_queue.put(data)
     
-    def get_data(self, queue):
+    def get_data(self):
         count = 0
         serial = 0
         df = pd.DataFrame()
 
         while True:
-            data = queue.get()
+            data = self.data_queue.get()
             if count == 1000:
                 df.to_csv(self.DATABASE_DIR + '\\data_{}.csv'.format(serial))        
                 serial += 1
@@ -478,7 +482,4 @@ class WebsocketAPI(UpbitMachine):
             df = df.append(data, ignore_index=True)
             count += 1
             print(count)
-            queue.task_done()
-
-    def store_data(self):
-        self.proc.start()
+            self.data_queue.task_done()
