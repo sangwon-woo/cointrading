@@ -4,6 +4,9 @@ import pandas as pd
 import time
 import json
 import config.setting as st
+import uuid
+import hashlib
+import jwt
 from autotrading.data_engine.data_queue import ClosableQueue
 from multiprocessing import Process
 import asyncio
@@ -57,13 +60,35 @@ class ExchangeAPI(UpbitMachine):
         super().__init__()
 
     def get_accounts(self):
-        pass
+        """
+        내가 보유한 자산 리스트 조회
+        """
+        url = self.BASE_API_URL + '/accounts'
+        payload = {
+            'access_key' : self.ACCESS_KEY,
+            'nonce' : str(uuid.uuid4())
+        }
+
+        jwt_token = jwt.encode(payload, self.SECRET_KEY)
+        authorization_token = 'Bearer {}'.format(jwt_token)
+        headers = {'Authorization' : authorization_token}
+
+        res = rq.get(url, headers=headers)
+
+        return res
 
     def get_orders_chance(self):
         pass
 
     def get_order(self, uuid, identifier):
-        pass
+        """
+        업비트에서 거래 가능한 마켓 목록 조회
+        
+        Parameters
+        ----------
+        is_details : Bool
+            유의종목 필드와 같은 상세 정보 노출 여부. 기본값은 False
+        """
 
     def get_order_list(self):
         pass

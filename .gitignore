@@ -134,3 +134,5 @@ conf/*
 *.ipynb
 
 config/config.ini
+dev.py
+test.py
