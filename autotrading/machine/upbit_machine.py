@@ -425,9 +425,7 @@ class WebsocketAPI(UpbitMachine):
         self.BASE_WEBSOCKET_URL = 'wss://api.upbit.com/websocket/v1'
         self.subscribe_format = None
         self.data_queue = ClosableQueue()
-        self.proc = Process(target=self.get_data(), args=(self,), name='Data Consumer')
-        self.proc.start()
-        self.proc.join()
+
 
     def set_subscribe_format(self, *type_field, ticket_field='UNIQUE_TICKET', format_field=None ):
         
@@ -454,25 +452,26 @@ class WebsocketAPI(UpbitMachine):
         self.subscribe_format = subscribe_format
 
     async def run_websocket(self):
+        self.set_process()
         await self.subscribe_websocket()
 
     async def subscribe_websocket(self):
         async with websockets.connect(self.BASE_WEBSOCKET_URL) as ws:
             subscribe_data = json.dumps(self.subscribe_format)
             await ws.send(subscribe_data)
-            
+
             while True:
                 data = await ws.recv()
                 data = json.loads(data)
-                print(data)
                 self.data_queue.put(data)
+                
     
     def get_data(self):
         count = 0
         serial = 0
         df = pd.DataFrame()
 
-        while True:
+        while not self.data_queue.empty():
             data = self.data_queue.get()
             if count == 1000:
                 df.to_csv(self.DATABASE_DIR + '\\data_{}.csv'.format(serial))        
@@ -483,3 +482,9 @@ class WebsocketAPI(UpbitMachine):
             count += 1
             print(count)
             self.data_queue.task_done()
+
+    def set_process(self):
+        self.proc = Process(target=self.get_data, name='Data Consumer')
+    
+    def run_process(self):
+        self.proc.start()
