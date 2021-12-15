@@ -112,20 +112,8 @@ class ExchangeAPI(UpbitMachine):
             'market' : market
         }
         query_string = urlencode(query).encode()
-        m = hashlib.sha512()
-        m.update(query_string)
-        query_hash = m.hexdigest()
-
-        payload = {
-            'access_key' : self.ACCESS_KEY,
-            'nonce' : str(uuid.uuid4()),
-            'query_hash' : query_hash,
-            'query_hash_alg' : 'SHA512'
-        }
-
-        jwt_token = jwt.encode(payload, self.SECRET_KEY)
-        authorization_token = 'Bearer {}'.format(jwt_token)
-        headers = {'Authorization' : authorization_token}
+        
+        headers = self.get_headers(query_string)
 
         res = rq.get(url, params=query, headers=headers).json()
 
@@ -146,18 +134,8 @@ class ExchangeAPI(UpbitMachine):
             'uuid' : uuid
         }
         query_string = urlencode(query).encode()
-        m = hashlib.sha512()
-        m.update(query_string)
-        query_hash = m.hexdigest()
-        payload = {
-            'access_key' : self.ACCESS_KEY,
-            'nonce' : str(uuid.uuid4()),
-            'query_hash' : query_hash,
-            'query_hash_alg' : 'SHA512'
-        }
-        jwt_token = jwt.encode(payload, self.SECRET_KEY)
-        authorization_token = 'Bearer {}'.format(jwt_token)
-        headers = {'Authorization' : authorization_token}
+        
+        headers = self.get_headers(query_string)
 
         res = rq.get(url, params=query, headers=headers).json()
 
@@ -185,13 +163,20 @@ class ExchangeAPI(UpbitMachine):
             order_by : str
                 정렬 방식. asc(오름차순), desc(내림차순, 기본값)
         """
+
+        url = self.BASE_API_URL + '/orders'
         query = kwargs
         query_string = urlencode(query)
-
         uuids_query_string = '&'.join([f'uuids[]={uuid}' for uuid in uuids])
-        query['uuids[]'] = uuids
         query_string = f'{query_string}&{uuids_query_string}'.encode()
 
+        query['uuids[]'] = uuids
+
+        headers = self.get_headers(query_string)
+
+        res = rq.get(url, params=query, headers=headers)
+
+        return res
 
 
     def delete_order(self, uuid, identifier):
