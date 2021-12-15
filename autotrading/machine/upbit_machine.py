@@ -113,15 +113,37 @@ class ExchangeAPI(UpbitMachine):
 
         return res
 
-    def get_order(self, uuid, identifier):
+    def get_order(self, uuid):
         """
-        
+        주문 UUID를 통해 개별 주문건을 조회
         
         Parameters
         ----------
-        is_details : Bool
-            유의종목 필드와 같은 상세 정보 노출 여부. 기본값은 False
+        uuid : str
+            주문 UUID
         """
+
+        url = self.BASE_API_URL + '/order'
+        query = {
+            'uuid' : uuid
+        }
+        query_string = urlencode(query).encode()
+        m = hashlib.sha512()
+        m.update(query_string)
+        query_hash = m.hexdigest()
+        payload = {
+            'access_key' : self.ACCESS_KEY,
+            'nonce' : str(uuid.uuid4()),
+            'query_hash' : query_hash,
+            'query_hash_alg' : 'SHA512'
+        }
+        jwt_token = jwt.encode(payload, self.SECRET_KEY)
+        authorization_token = 'Bearer {}'.format(jwt_token)
+        headers = {'Authorization' : authorization_token}
+
+        res = rq.get(url, params=query, headers=headers).json()
+
+        return res
 
     def get_order_list(self):
         pass
