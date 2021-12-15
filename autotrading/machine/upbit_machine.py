@@ -9,6 +9,7 @@ import hashlib
 import jwt
 from autotrading.data_engine.data_queue import ClosableQueue
 from multiprocessing import Process
+from urllib.parse import urlencode
 import asyncio
 
 
@@ -63,6 +64,7 @@ class ExchangeAPI(UpbitMachine):
         """
         내가 보유한 자산 리스트 조회
         """
+
         url = self.BASE_API_URL + '/accounts'
         payload = {
             'access_key' : self.ACCESS_KEY,
@@ -73,16 +75,47 @@ class ExchangeAPI(UpbitMachine):
         authorization_token = 'Bearer {}'.format(jwt_token)
         headers = {'Authorization' : authorization_token}
 
-        res = rq.get(url, headers=headers)
+        res = rq.get(url, headers=headers).json()
 
         return res
 
-    def get_orders_chance(self):
-        pass
+    def get_orders_chance(self, market:str='KRW-BTC'):
+        """
+        마켓별 주문 가능 정보를 확인
+        
+        Parameters
+        ----------
+        market : str
+            마켓 ID. 기본값은 KRW-BTC
+        """
+
+        url = self.BASE_API_URL + '/orders/chance'
+        query = {
+            'market' : market
+        }
+        query_string = urlencode(query).encode()
+        m = hashlib.sha512()
+        m.update(query_string)
+        query_hash = m.hexdigest()
+
+        payload = {
+            'access_key' : self.ACCESS_KEY,
+            'nonce' : str(uuid.uuid4()),
+            'query_hash' : query_hash,
+            'query_hash_alg' : 'SHA512'
+        }
+
+        jwt_token = jwt.encode(payload, self.SECRET_KEY)
+        authorization_token = 'Bearer {}'.format(jwt_token)
+        headers = {'Authorization' : authorization_token}
+
+        res = rq.get(url, params=query, headers=headers).json()
+
+        return res
 
     def get_order(self, uuid, identifier):
         """
-        업비트에서 거래 가능한 마켓 목록 조회
+        
         
         Parameters
         ----------
