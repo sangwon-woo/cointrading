@@ -60,6 +60,24 @@ class ExchangeAPI(UpbitMachine):
     def __init__(self) -> None:
         super().__init__()
 
+    def get_headers(self, query_string):
+        m = hashlib.sha512()
+        m.update(query_string)
+        query_hash = m.hexdigest()
+
+        payload = {
+            'access_key' : self.ACCESS_KEY,
+            'nonce' : str(uuid.uuid4()),
+            'query_hash' : query_hash,
+            'query_hash_alg' : 'SHA512'
+        }
+
+        jwt_token = jwt.encode(payload, self.SECRET_KEY)
+        authorize_token = f'Bearer {jwt_token}'
+        headers = {"Authorization":authorize_token}
+
+        return headers
+
     def get_accounts(self):
         """
         내가 보유한 자산 리스트 조회
@@ -113,7 +131,7 @@ class ExchangeAPI(UpbitMachine):
 
         return res
 
-    def get_order(self, uuid):
+    def get_order(self, uuid:str):
         """
         주문 UUID를 통해 개별 주문건을 조회
         
@@ -145,8 +163,36 @@ class ExchangeAPI(UpbitMachine):
 
         return res
 
-    def get_order_list(self):
-        pass
+    def get_order_list(self, uuids:list, **kwargs):
+        """
+        주문 UUID를 통해 개별 주문건을 조회
+        
+        Parameters
+        ----------
+        uuids : list
+            주문 UUID의 목록
+        kwargs : 
+            market : str
+                마켓 아이디
+            state : str
+                주문 상태. wait, watch, done, cancel
+            states : list
+                주문 상태의 목록. 미체결 주문(wait, watch)과 완료 주문(done, cancel)은 혼합하여 조회할 수 없음
+            page : int
+                페이지 수. 기본값은 1
+            limit : int
+                요청 개수. 기본값은 100
+            order_by : str
+                정렬 방식. asc(오름차순), desc(내림차순, 기본값)
+        """
+        query = kwargs
+        query_string = urlencode(query)
+
+        uuids_query_string = '&'.join([f'uuids[]={uuid}' for uuid in uuids])
+        query['uuids[]'] = uuids
+        query_string = f'{query_string}&{uuids_query_string}'.encode()
+
+
 
     def delete_order(self, uuid, identifier):
         pass
