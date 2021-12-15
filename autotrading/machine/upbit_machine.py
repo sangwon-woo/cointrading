@@ -381,16 +381,16 @@ class QuotationAPI(UpbitMachine):
 
         if to:
             if converting_price_unit:
-                print('{}보다 이전 일봉 데이터 및 {}로 환산하여 조회'.format(to, converting_price_unit))
+                print(f'{market} => {to}보다 이전 일봉 데이터 및 {converting_price_unit}로 환산하여 조회')
                 to = to.replace(' ', '%20').replace(':', '%3A')
                 query = 'market={}&to={}&count={}&convertingPriceUnit={}'.format(market, to, count, converting_price_unit)
             else:
-                print('{}보다 이전 일봉 데이터 조회'.format(to))
+                print(f'{market} => {to}보다 이전 일봉 데이터 조회')
                 to = to.replace(' ', '%20').replace(':', '%3A')
                 query = 'market={}&to={}&count={}'.format(market, to, count)
         else:
             if converting_price_unit:
-                print('{}로 환산하여 조회'.format(converting_price_unit))
+                print(f'{market} => {converting_price_unit}로 환산하여 조회')
                 query = 'market={}&count={}&convertingPriceUnit={}'.format(market, count, converting_price_unit)
             else:
                 query = 'market={}&count={}'.format(market, count)
