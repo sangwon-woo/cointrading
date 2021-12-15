@@ -178,11 +178,36 @@ class ExchangeAPI(UpbitMachine):
 
         return res
 
+    def delete_order(self, uuid:str):
+        """
+        주문 UUID를 통해 해당 주문에 대한 취소 접수
+        
+        Parameters
+        ----------
+        uuid : list
+            취소할 주문의 UUID
+        """
+        url = self.BASE_API_URL + '/order'
+        query = {
+            'uuid' : uuid
+        }
+        query_string = urlencode(query).encode()
 
-    def delete_order(self, uuid, identifier):
-        pass
+        headers = self.get_headers(query_string)
+
+        res = rq.delete(url, params=query, headers=headers).json()
+
+        return res
 
     def post_order(self, market:str, side:str, volume:str, price:str, ord_type:str, identifier:str):
+        """
+        주문 UUID를 통해 해당 주문에 대한 취소 접수
+        
+        Parameters
+        ----------
+        uuid : list
+            취소할 주문의 UUID
+        """
         body = dict()
         pass
 
