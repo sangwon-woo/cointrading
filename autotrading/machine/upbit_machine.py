@@ -1,4 +1,5 @@
 import requests as rq
+from requests.api import head
 import websockets
 import pandas as pd
 import time
@@ -199,17 +200,40 @@ class ExchangeAPI(UpbitMachine):
 
         return res
 
-    def post_order(self, market:str, side:str, volume:str, price:str, ord_type:str, identifier:str):
+    def post_order(self, market:str, side:str, volume:str, price:str, ord_type:str):
         """
-        주문 UUID를 통해 해당 주문에 대한 취소 접수
+        주문 요청
         
         Parameters
         ----------
-        uuid : list
-            취소할 주문의 UUID
+        market : str
+            마켓 ID
+        side : str
+            주문 종류. bid(매수), ask(매도)
+        volume : str
+            주문량. 지정가 및 시장가 매도 시 필수
+        price : str
+            주문 가격. 지정가 및 시장가 매수 시 필수
+        ord_type : str
+            주문 타입. limit(지정가 주문), price(시장가 매수 주문), market(시장가 매도 주문)
         """
-        body = dict()
-        pass
+        
+        url = self.BASE_API_URL + '/orders'
+
+        query = {
+            'market' : market,
+            'side' : side,
+            'volume' : volume,
+            'price' : price,
+            'ord_type' : ord_type
+        }
+        query_string = urlencode(query).encode()
+
+        headers = self.get_headers(query_string)
+
+        res = rq.post(url, params=query, headers=headers).json()
+
+        return res
 
     def get_coin_addresses(self):
         pass
