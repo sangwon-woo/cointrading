@@ -136,3 +136,4 @@ conf/*
 config/config.ini
 dev.py
 test.py
+data/*
