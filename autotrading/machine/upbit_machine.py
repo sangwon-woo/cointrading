@@ -341,7 +341,7 @@ class QuotationAPI(UpbitMachine):
         base_url = self.BASE_API_URL + '/candles/minutes/{}?'.format(unit)
 
         if to:
-            print('{}보다 이전 {}분봉 데이터 조회'.format(to, unit))
+            print(f'{market} => {to}보다 이전 {unit}분봉 데이터 조회')
             to = to.replace(' ', '%20').replace(':', '%3A')
             query = 'market={}&to={}&count={}'.format(market, to, count)
         else:
@@ -426,7 +426,7 @@ class QuotationAPI(UpbitMachine):
         base_url = self.BASE_API_URL + '/candles/weeks?'
 
         if to:
-            print('{}보다 이전 주봉 데이터 조회'.format(to))
+            print(f'{market} => {to}보다 이전 주봉 데이터 조회')
             to = to.replace(' ', '%20').replace(':', '%3A')
             query = 'market={}&to={}&count={}'.format(market, to, count)
         else:
@@ -463,7 +463,7 @@ class QuotationAPI(UpbitMachine):
         base_url = self.BASE_API_URL + '/candles/months?'
 
         if to:
-            print('{}보다 이전 월봉 데이터 조회'.format(to))
+            print(f'{market} => {to}보다 이전 월봉 데이터 조회')
             to = to.replace(' ', '%20').replace(':', '%3A')
             query = 'market={}&to={}&count={}'.format(market, to, count)
         else:
