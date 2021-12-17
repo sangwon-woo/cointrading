@@ -74,13 +74,13 @@ class Collector:
             s = time.time()
             coin_df = pd.DataFrame()
             save_dir = UPBIT_DATABASE_DIR + f'\\daily\\{market}.csv'
-            latest_df = self.machine.get_minute_candle(unit=1, market=market, count=200)
+            latest_df = self.machine.get_day_candle(market=market, count=200)
 
             last_time = self.get_last_time(latest_df)
             coin_df = coin_df.append(latest_df, ignore_index=True)
             
             while True:
-                df = self.machine.get_minute_candle(unit=1, market=market, to=last_time, count=200)
+                df = self.machine.get_day_candle(market=market, to=last_time, count=200)
                 if len(df.index) == 0:
                     break
                 last_time = self.get_last_time(df)
@@ -99,7 +99,7 @@ class Collector:
             old_df = pd.read_csv(load_dir, encoding='utf-8')
             first_time = old_df.loc[0, 'candle_date_time_utc']
 
-            latest_df = self.machine.get_minute_candle(unit=1, market=market, count=200)
+            latest_df = self.machine.get_day_candle(market=market, count=200)
             last_time = self.get_last_time(latest_df)
             
             if last_time <= first_time:
@@ -109,7 +109,7 @@ class Collector:
                 return old_df
             else:
                 while True:
-                    df = self.machine.get_minute_candle(unit=1, market=market, to=last_time)
+                    df = self.machine.get_day_candle(market=market, to=last_time)
 
                     if last_time <= first_time:
                         subset_df = df[df['candle_date_time_utc'] > first_time]
