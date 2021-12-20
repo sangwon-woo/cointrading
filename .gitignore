@@ -138,3 +138,5 @@ dev.py
 test.py
 data/*
 *.arrx
+*.arr
+*.DS_store
