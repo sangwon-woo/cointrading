@@ -1,6 +1,7 @@
 import time
 import pandas as pd
 from config.setting import *
+from dateutil.parser import parse
 
 class Collector:
     def __init__(self, machine):
@@ -51,21 +52,31 @@ class Collector:
 
             latest_df = self.machine.get_minute_candle(unit=1, market=market, count=200)
             last_time = self.get_last_time(latest_df)
+
+            first_time, last_time = parse(first_time), parse(last_time)
             
             if last_time <= first_time:
                 subset_df = latest_df[latest_df['candle_date_time_utc'] > first_time]
                 old_df = old_df.append(subset_df, ignore_index=True)
 
-                return old_df
+                old_df.to_csv(save_dir, index=None, encoding='utf-8')
+                print(f'{market} => Delta', time.time() - s)
+                continue
+
             else:
                 while True:
                     df = self.machine.get_minute_candle(unit=1, market=market, to=last_time)
+                    last_time = self.get_last_time(df)
+                    last_time = parse(last_time)
 
                     if last_time <= first_time:
                         subset_df = df[df['candle_date_time_utc'] > first_time]
                         old_df = old_df.append(subset_df, ignore_index=True)
-                        return old_df
-                    last_time = self.get_last_time(df)
+                        
+                        old_df.to_csv(save_dir, index=None, encoding='utf-8')
+                        print(f'{market} => Delta', time.time() - s)
+                        continue
+                         
                     old_df = old_df.append(df, ignore_index=True)
 
     def collect_daily_all_data(self, markets:list):
@@ -101,20 +112,30 @@ class Collector:
 
             latest_df = self.machine.get_day_candle(market=market, count=200)
             last_time = self.get_last_time(latest_df)
+
+            first_time, last_time = parse(first_time), parse(last_time)
             
             if last_time <= first_time:
                 subset_df = latest_df[latest_df['candle_date_time_utc'] > first_time]
                 old_df = old_df.append(subset_df, ignore_index=True)
 
-                return old_df
+                old_df.to_csv(save_dir, index=None, encoding='utf-8')
+                print(f'{market} => Delta', time.time() - s)
+                continue
+
             else:
                 while True:
                     df = self.machine.get_day_candle(market=market, to=last_time)
+                    last_time = self.get_last_time(df)
+                    last_time = parse(last_time)
 
                     if last_time <= first_time:
                         subset_df = df[df['candle_date_time_utc'] > first_time]
                         old_df = old_df.append(subset_df, ignore_index=True)
-                        return old_df
-                    last_time = self.get_last_time(df)
+
+                        old_df.to_csv(save_dir, index=None, encoding='utf-8')
+                        print(f'{market} => Delta', time.time() - s)
+                        continue
+                    
                     old_df = old_df.append(df, ignore_index=True)                
 
