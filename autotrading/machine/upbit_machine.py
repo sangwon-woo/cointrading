@@ -323,6 +323,7 @@ class QuotationAPI(UpbitMachine):
     def get_minute_candle(self, unit=1, market='KRW-BTC', to=None, count=1) -> pd.DataFrame:
         """
         특정 화폐의 분봉 조회
+        ----------
         
         Parameters
         ----------

@@ -57,7 +57,7 @@ class Collector:
         return col_dtypes
 
     def get_last_time(self, df):
-        last_time = df.loc[df.shape[0]-1, 'candle_date_time_utc']
+        last_time = df.loc[df.shape[0]-1, '시각_utc']
         last_time = ' '.join(last_time.split('T'))
 
         return last_time
@@ -140,16 +140,16 @@ class Collector:
             save_dir = DIR_UPBIT_MINUTELY_CANDLE + f'\\{market}.arr'
 
             old_df = pd.read_feather(load_dir)
-            first_time = old_df.loc[0, 'candle_date_time_utc']
+            first_time = old_df.loc[0, '시각_utc']
 
             latest_df = self.machine.get_minute_candle(unit=1, market=market, count=200)
             latest_df = self.set_columns_dtypes(latest_df, type='minutely')
             last_time = self.get_last_time(latest_df)
 
-            first_time, last_time = parse(first_time), parse(last_time)
+            parsed_first_time, parsed_last_time = parse(first_time), parse(last_time)
             
-            if last_time <= first_time:
-                subset_df = latest_df[latest_df['candle_date_time_utc'] > first_time]
+            if parsed_last_time <= parsed_first_time:
+                subset_df = latest_df[latest_df['시각_utc'] > parsed_first_time]
                 old_df = old_df.append(subset_df, ignore_index=True)
 
                 old_df = self.set_columns_dtypes(old_df, type='minutely')
@@ -162,10 +162,10 @@ class Collector:
                     df = self.machine.get_minute_candle(unit=1, market=market, to=last_time)
                     df = self.set_columns_dtypes(df, type='minutely')
                     last_time = self.get_last_time(df)
-                    last_time = parse(last_time)
+                    parsed_last_time = parse(last_time)
 
-                    if last_time <= first_time:
-                        subset_df = df[df['candle_date_time_utc'] > first_time]
+                    if parsed_last_time <= parsed_first_time:
+                        subset_df = df[df['시각_utc'] > parsed_first_time]
                         old_df = old_df.append(subset_df, ignore_index=True)
                         
                         old_df = self.set_columns_dtypes(old_df, type='minutely')
@@ -205,16 +205,16 @@ class Collector:
             save_dir = DIR_UPBIT_DAILY_CANDLE + f'\\{market}.arr'
 
             old_df = pd.read_feather(load_dir)
-            first_time = old_df.loc[0, 'candle_date_time_utc']
+            first_time = old_df.loc[0, '시각_utc']
 
             latest_df = self.machine.get_day_candle(market=market, count=200)
             latest_df = self.set_columns_dtypes(latest_df, type='daily')
             last_time = self.get_last_time(latest_df)
 
-            first_time, last_time = parse(first_time), parse(last_time)
+            parsed_first_time, parsed_last_time = parse(first_time), parse(last_time)
             
-            if last_time <= first_time:
-                subset_df = latest_df[latest_df['candle_date_time_utc'] > first_time]
+            if parsed_last_time <= parsed_first_time:
+                subset_df = latest_df[latest_df['시각_utc'] > parsed_first_time]
                 old_df = old_df.append(subset_df, ignore_index=True)
 
                 old_df = self.set_columns_dtypes(old_df, type='daily')
@@ -227,10 +227,10 @@ class Collector:
                     df = self.machine.get_day_candle(market=market, to=last_time)
                     df = self.set_columns_dtypes(df, type='daily')
                     last_time = self.get_last_time(df)
-                    last_time = parse(last_time)
+                    parsed_last_time = parse(last_time)
 
-                    if last_time <= first_time:
-                        subset_df = df[df['candle_date_time_utc'] > first_time]
+                    if parsed_last_time <= parsed_first_time:
+                        subset_df = df[df['시각_utc'] > parsed_first_time]
                         old_df = old_df.append(subset_df, ignore_index=True)
 
                         old_df = self.set_columns_dtypes(old_df, type='daily')
