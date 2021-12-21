@@ -70,7 +70,7 @@ class Collector:
         for market in markets:
             s = time.time()
             coin_df = pd.DataFrame()
-            save_dir = UPBIT_DATABASE_DIR + f'\\minutely\\{market}.csv'
+            save_dir = DIR_UPBIT_MINUTELY_CANDLE + f'\\{market}.csv'
             latest_df = self.machine.get_minute_candle(unit=1, market=market, count=200)
 
             last_time = self.get_last_time(latest_df)
@@ -90,8 +90,8 @@ class Collector:
 
         for market in markets:
             s = time.time()
-            load_dir = UPBIT_DATABASE_DIR + f'\\minutely\\{market}.csv'
-            save_dir = UPBIT_DATABASE_DIR + f'\\minutely\\{market}.csv'
+            load_dir = DIR_UPBIT_MINUTELY_CANDLE + f'\\{market}.csv'
+            save_dir = DIR_UPBIT_MINUTELY_CANDLE + f'\\{market}.csv'
 
             old_df = pd.read_csv(load_dir, encoding='utf-8')
             first_time = old_df.loc[0, 'candle_date_time_utc']
@@ -130,7 +130,7 @@ class Collector:
         for market in markets:
             s = time.time()
             coin_df = pd.DataFrame()
-            save_dir = UPBIT_DATABASE_DIR + f'\\daily\\{market}.csv'
+            save_dir = DIR_UPBIT_DAILY_CANDLE + f'\\{market}.csv'
             latest_df = self.machine.get_day_candle(market=market, count=200)
 
             last_time = self.get_last_time(latest_df)
@@ -150,8 +150,8 @@ class Collector:
 
         for market in markets:
             s = time.time()
-            load_dir = UPBIT_DATABASE_DIR + f'\\daily\\{market}.csv'
-            save_dir = UPBIT_DATABASE_DIR + f'\\daily\\{market}.csv'
+            load_dir = DIR_UPBIT_DAILY_CANDLE + f'\\{market}.csv'
+            save_dir = DIR_UPBIT_DAILY_CANDLE + f'\\{market}.csv'
 
             old_df = pd.read_csv(load_dir, encoding='utf-8')
             first_time = old_df.loc[0, 'candle_date_time_utc']
