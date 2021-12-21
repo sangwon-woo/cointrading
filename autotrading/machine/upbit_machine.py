@@ -33,6 +33,8 @@ class UpbitMachine:
 class ExchangeAPI(UpbitMachine):
     """
     업비트 API 중 Exchange와 관련된 API
+    --------
+
     1. 자산
         - 전체 계좌 조회 : 내가 보유한 자산 리스트 조회
     2. 주문
