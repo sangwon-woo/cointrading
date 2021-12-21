@@ -143,6 +143,7 @@ class Collector:
             first_time = old_df.loc[0, 'candle_date_time_utc']
 
             latest_df = self.machine.get_minute_candle(unit=1, market=market, count=200)
+            latest_df = self.set_columns_dtypes(latest_df, type='minutely')
             last_time = self.get_last_time(latest_df)
 
             first_time, last_time = parse(first_time), parse(last_time)
@@ -150,8 +151,8 @@ class Collector:
             if last_time <= first_time:
                 subset_df = latest_df[latest_df['candle_date_time_utc'] > first_time]
                 old_df = old_df.append(subset_df, ignore_index=True)
-                old_df = self.set_columns_dtypes(old_df, type='minutely')
 
+                old_df = self.set_columns_dtypes(old_df, type='minutely')
                 old_df.to_feather(save_dir)
                 print(f'{market} => Delta', time.time() - s)
                 continue
@@ -159,14 +160,15 @@ class Collector:
             else:
                 while True:
                     df = self.machine.get_minute_candle(unit=1, market=market, to=last_time)
+                    df = self.set_columns_dtypes(df, type='minutely')
                     last_time = self.get_last_time(df)
                     last_time = parse(last_time)
 
                     if last_time <= first_time:
                         subset_df = df[df['candle_date_time_utc'] > first_time]
                         old_df = old_df.append(subset_df, ignore_index=True)
-                        old_df = self.set_columns_dtypes(old_df, type='minutely')
                         
+                        old_df = self.set_columns_dtypes(old_df, type='minutely')
                         old_df.to_feather(save_dir)
                         print(f'{market} => Delta', time.time() - s)
                         continue
@@ -206,6 +208,7 @@ class Collector:
             first_time = old_df.loc[0, 'candle_date_time_utc']
 
             latest_df = self.machine.get_day_candle(market=market, count=200)
+            latest_df = self.set_columns_dtypes(latest_df, type='daily')
             last_time = self.get_last_time(latest_df)
 
             first_time, last_time = parse(first_time), parse(last_time)
@@ -213,8 +216,8 @@ class Collector:
             if last_time <= first_time:
                 subset_df = latest_df[latest_df['candle_date_time_utc'] > first_time]
                 old_df = old_df.append(subset_df, ignore_index=True)
-                old_df = self.set_columns_dtypes(old_df, type='daily')
 
+                old_df = self.set_columns_dtypes(old_df, type='daily')
                 old_df.to_feather(save_dir)
                 print(f'{market} => Delta', time.time() - s)
                 continue
@@ -222,14 +225,15 @@ class Collector:
             else:
                 while True:
                     df = self.machine.get_day_candle(market=market, to=last_time)
+                    df = self.set_columns_dtypes(df, type='daily')
                     last_time = self.get_last_time(df)
                     last_time = parse(last_time)
 
                     if last_time <= first_time:
                         subset_df = df[df['candle_date_time_utc'] > first_time]
                         old_df = old_df.append(subset_df, ignore_index=True)
-                        old_df = self.set_columns_dtypes(old_df, type='daily')
 
+                        old_df = self.set_columns_dtypes(old_df, type='daily')
                         old_df.to_feather(save_dir)
                         print(f'{market} => Delta', time.time() - s)
                         continue
