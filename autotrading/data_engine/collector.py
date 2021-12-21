@@ -98,7 +98,6 @@ class Collector:
                 'change_rate' : '전일종가대비변화량'
             }
             df = df.drop(columns=['timestamp', 'prev_closing_price']).rename(columns=columns)
-            df = df.astype({'누적거래금액':'int', '누적거래량':'int'})
             dtypes = self.check_dtypes(df)
             df = df.astype(dtypes)
             
@@ -115,7 +114,6 @@ class Collector:
                 'candle_acc_trade_volume' : '누적거래량'
             }
             df = df.drop(columns=['timestamp', 'unit']).rename(columns=columns)
-            df = df.astype({'누적거래금액':'int', '누적거래량':'int'})
             dtypes = self.check_dtypes(df)
             df = df.astype(dtypes)
 
