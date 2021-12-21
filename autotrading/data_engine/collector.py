@@ -8,6 +8,57 @@ class Collector:
     def __init__(self, machine):
         self.machine = machine()
 
+    def check_dtypes(self, df):
+        col_dtypes = {}
+        for col in df.columns:
+            dtype = df[col].dtype
+
+            if dtype == 'int' or dtype == 'float':
+                c_min = df[col].min()
+                c_max = df[col].max()
+            elif dtype == 'object':
+                n_unique = df[col].nunique()
+                threshold = n_unique / df.shape[0]
+
+            if dtype == 'int':
+                if c_min >= np.iinfo(np.int8).min and c_max <= np.iinfo(np.int8).max:
+                    col_dtype = 'int8'
+                elif c_min >= np.iinfo(np.uint8).min and c_max <= np.iinfo(np.uint8).max:
+                    col_dtype = 'uint8'
+                elif c_min >= np.iinfo(np.int16).min and c_max <= np.iinfo(np.int16).max:
+                    col_dtype = 'int16'
+                elif c_min >= np.iinfo(np.uint16).min and c_max <= np.iinfo(np.uint16).max:
+                    col_dtype = 'uint16'
+                elif c_min >= np.iinfo(np.int32).min and c_max <= np.iinfo(np.int32).max:
+                    col_dtype = 'int32'
+                elif c_min >= np.iinfo(np.uint32).min and c_max <= np.iinfo(np.uint32).max:
+                    col_dtype = 'uint32'
+                elif c_min >= np.iinfo(np.int64).min and c_max <= np.iinfo(np.int64).max:
+                    col_dtype = 'int64'
+                elif c_min >= np.iinfo(np.uint64).min and c_max <= np.iinfo(np.uint64).max:
+                    col_dtype = 'uint64'
+                elif c_min >= np.iinfo(np.int128).min and c_max <= np.iinfo(np.int128).max:
+                    col_dtype = 'int128'
+                elif c_min >= np.iinfo(np.uint128).min and c_max <= np.iinfo(np.uint128).max:
+                    col_dtype = 'uint128'
+
+            elif dtype == 'float':
+                # if c_min >= np.finfo(np.float16).min and c_max <= np.finfo(np.float16).max:
+                #     col_dtype = 'float16'
+                if c_min >= np.finfo(np.float32).min and c_max <= np.finfo(np.float32).max:
+                    col_dtype = 'float32'
+                elif c_min >= np.finfo(np.float64).min and c_max <= np.finfo(np.float64).max:
+                    col_dtype = 'float64'
+
+            elif dtype == 'object':
+                if threshold > 0.7:
+                    col_dtype = 'object'
+                else:
+                    col_dtype = 'category'
+            col_dtypes[col] = col_dtype
+
+        return col_dtypes
+
     def get_last_time(self, df):
         last_time = df.loc[df.shape[0]-1, 'candle_date_time_utc']
         last_time = ' '.join(last_time.split('T'))
@@ -37,12 +88,9 @@ class Collector:
                 'change_price' : '전일종가대비변화금액',
                 'change_rate' : '전일종가대비변화량'
             }
-            dtypes = {
-                '시장-코인' : 'category',
-                '누적거래금액' : np.uint64,
-                '누적거래량' : np.uint64
-            }
-            df = df.drop(columns=['timestamp', 'unit']).rename(columns=columns).astype(dtypes)
+            df = df.drop(columns=['timestamp', 'prev_closing_price']).rename(columns=columns)
+            dtypes = self.check_dtypes(df)
+            df = df.astype(dtypes)
             
         elif type == 'minutely':
             columns = {
@@ -56,12 +104,9 @@ class Collector:
                 'candle_acc_trade_price' : '누적거래금액',
                 'candle_acc_trade_volume' : '누적거래량'
             }
-            dtypes = {
-                '시장-코인' : 'category',
-                '누적거래금액' : np.uint64,
-                '누적거래량' : np.unit64
-            }
-            df = df.drop(columns=['timestamp', 'unit']).rename(columns=columns).astype(dtypes)
+            df = df.drop(columns=['timestamp', 'unit']).rename(columns=columns)
+            dtypes = self.check_dtypes(df)
+            df = df.astype(dtypes)
 
         return df
 
