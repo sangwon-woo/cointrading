@@ -5,7 +5,9 @@ parser.read('config/config.ini')
 
 UPBIT_ACCESS_KEY = parser.get('upbit', 'access_key')
 UPBIT_SECRET_KEY = parser.get('upbit', 'secret_key')
-UPBIT_DATABASE_DIR = 'D:\\coin_database\\domestic\\upbit'
+DIR_UPBIT_DATABASE = 'D:\\coin_database\\domestic\\upbit'
+DIR_UPBIT_DAILY_CANDLE = DIR_UPBIT_DATABASE + '\\daily'
+DIR_UPBIT_MINUTELY_CANDLE = DIR_UPBIT_DATABASE + '\\minutely'
 
 BITHUMB_CONNECT_KEY = parser.get('bithumb', 'connect_key')
 BITHUMB_SECRET_KEY = parser.get('bithumb', 'secret_key')
