@@ -89,6 +89,7 @@ class Collector:
                 'change_rate' : '전일종가대비변화량'
             }
             df = df.drop(columns=['timestamp', 'prev_closing_price']).rename(columns=columns)
+            df = df.astype({'누적거래금액':np.int128, '누적거래량':np.int128})
             dtypes = self.check_dtypes(df)
             df = df.astype(dtypes)
             
@@ -105,6 +106,7 @@ class Collector:
                 'candle_acc_trade_volume' : '누적거래량'
             }
             df = df.drop(columns=['timestamp', 'unit']).rename(columns=columns)
+            df = df.astype({'누적거래금액':np.int128, '누적거래량':np.int128})
             dtypes = self.check_dtypes(df)
             df = df.astype(dtypes)
 
@@ -115,7 +117,7 @@ class Collector:
         for market in markets:
             s = time.time()
             coin_df = pd.DataFrame()
-            save_dir = DIR_UPBIT_MINUTELY_CANDLE + f'\\{market}.csv'
+            save_dir = DIR_UPBIT_MINUTELY_CANDLE + f'\\{market}.arr'
             latest_df = self.machine.get_minute_candle(unit=1, market=market, count=200)
 
             last_time = self.get_last_time(latest_df)
@@ -128,17 +130,19 @@ class Collector:
                 last_time = self.get_last_time(df)
                 coin_df = coin_df.append(df, ignore_index=True)
 
-            coin_df.to_csv(save_dir, index=None, encoding='utf-8')
+            coin_df = self.set_columns_dtypes(coin_df, type='minutely')
+
+            coin_df.to_feather(save_dir)
             print(f'{market} => Delta', time.time() - s)
 
     def collect_minutely_data_until_now(self, markets:list):
 
         for market in markets:
             s = time.time()
-            load_dir = DIR_UPBIT_MINUTELY_CANDLE + f'\\{market}.csv'
-            save_dir = DIR_UPBIT_MINUTELY_CANDLE + f'\\{market}.csv'
+            load_dir = DIR_UPBIT_MINUTELY_CANDLE + f'\\{market}.arr'
+            save_dir = DIR_UPBIT_MINUTELY_CANDLE + f'\\{market}.arr'
 
-            old_df = pd.read_csv(load_dir, encoding='utf-8')
+            old_df = pd.read_feather(load_dir)
             first_time = old_df.loc[0, 'candle_date_time_utc']
 
             latest_df = self.machine.get_minute_candle(unit=1, market=market, count=200)
@@ -149,8 +153,9 @@ class Collector:
             if last_time <= first_time:
                 subset_df = latest_df[latest_df['candle_date_time_utc'] > first_time]
                 old_df = old_df.append(subset_df, ignore_index=True)
+                old_df = self.set_columns_dtypes(old_df, type='minutely')
 
-                old_df.to_csv(save_dir, index=None, encoding='utf-8')
+                old_df.to_feather(save_dir)
                 print(f'{market} => Delta', time.time() - s)
                 continue
 
@@ -163,11 +168,11 @@ class Collector:
                     if last_time <= first_time:
                         subset_df = df[df['candle_date_time_utc'] > first_time]
                         old_df = old_df.append(subset_df, ignore_index=True)
+                        old_df = self.set_columns_dtypes(old_df, type='minutely')
                         
-                        old_df.to_csv(save_dir, index=None, encoding='utf-8')
+                        old_df.to_feather(save_dir)
                         print(f'{market} => Delta', time.time() - s)
                         continue
-                         
                     old_df = old_df.append(df, ignore_index=True)
 
     def collect_daily_all_data(self, markets:list):
@@ -175,7 +180,7 @@ class Collector:
         for market in markets:
             s = time.time()
             coin_df = pd.DataFrame()
-            save_dir = DIR_UPBIT_DAILY_CANDLE + f'\\{market}.csv'
+            save_dir = DIR_UPBIT_DAILY_CANDLE + f'\\{market}.arr'
             latest_df = self.machine.get_day_candle(market=market, count=200)
 
             last_time = self.get_last_time(latest_df)
@@ -188,17 +193,19 @@ class Collector:
                 last_time = self.get_last_time(df)
                 coin_df = coin_df.append(df, ignore_index=True)
 
-            coin_df.to_csv(save_dir, index=None, encoding='utf-8')
+            coin_df = self.set_columns_dtypes(coin_df, type='daily')
+
+            coin_df.to_feather(save_dir)
             print(f'{market} => Delta', time.time() - s)
 
     def collect_daily_data_until_now(self, markets:list):
 
         for market in markets:
             s = time.time()
-            load_dir = DIR_UPBIT_DAILY_CANDLE + f'\\{market}.csv'
-            save_dir = DIR_UPBIT_DAILY_CANDLE + f'\\{market}.csv'
+            load_dir = DIR_UPBIT_DAILY_CANDLE + f'\\{market}.arr'
+            save_dir = DIR_UPBIT_DAILY_CANDLE + f'\\{market}.arr'
 
-            old_df = pd.read_csv(load_dir, encoding='utf-8')
+            old_df = pd.read_feather(load_dir)
             first_time = old_df.loc[0, 'candle_date_time_utc']
 
             latest_df = self.machine.get_day_candle(market=market, count=200)
@@ -209,8 +216,9 @@ class Collector:
             if last_time <= first_time:
                 subset_df = latest_df[latest_df['candle_date_time_utc'] > first_time]
                 old_df = old_df.append(subset_df, ignore_index=True)
+                old_df = self.set_columns_dtypes(old_df, type='daily')
 
-                old_df.to_csv(save_dir, index=None, encoding='utf-8')
+                old_df.to_feather(save_dir)
                 print(f'{market} => Delta', time.time() - s)
                 continue
 
@@ -223,8 +231,9 @@ class Collector:
                     if last_time <= first_time:
                         subset_df = df[df['candle_date_time_utc'] > first_time]
                         old_df = old_df.append(subset_df, ignore_index=True)
+                        old_df = self.set_columns_dtypes(old_df, type='daily')
 
-                        old_df.to_csv(save_dir, index=None, encoding='utf-8')
+                        old_df.to_feather(save_dir)
                         print(f'{market} => Delta', time.time() - s)
                         continue
 
