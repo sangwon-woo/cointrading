@@ -25,7 +25,7 @@ class UpbitMachine:
     def __init__(self) -> None:
         self.ACCESS_KEY = st.UPBIT_ACCESS_KEY
         self.SECRET_KEY = st.UPBIT_SECRET_KEY
-        self.DATABASE_DIR = st.UPBIT_DATABASE_DIR
+        self.DIR_DATABASE = st.DIR_UPBIT_DATABASE
         self.access_token = None
         self.refresh_token = None
 
@@ -634,7 +634,7 @@ class WebsocketAPI(UpbitMachine):
         while not self.data_queue.empty():
             data = self.data_queue.get()
             if count == 1000:
-                df.to_csv(self.DATABASE_DIR + '\\data_{}.csv'.format(serial))        
+                df.to_csv(self.DIR_DATABASE + '\\data_{}.csv'.format(serial))        
                 serial += 1
                 df = pd.DataFrame()
                 count = 0
