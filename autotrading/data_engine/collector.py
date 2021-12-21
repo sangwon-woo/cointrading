@@ -37,10 +37,7 @@ class Collector:
                     col_dtype = 'int64'
                 elif c_min >= np.iinfo(np.uint64).min and c_max <= np.iinfo(np.uint64).max:
                     col_dtype = 'uint64'
-                elif c_min >= np.iinfo(np.int128).min and c_max <= np.iinfo(np.int128).max:
-                    col_dtype = 'int128'
-                elif c_min >= np.iinfo(np.uint128).min and c_max <= np.iinfo(np.uint128).max:
-                    col_dtype = 'uint128'
+
 
             elif dtype == 'float':
                 # if c_min >= np.finfo(np.float16).min and c_max <= np.finfo(np.float16).max:
@@ -89,7 +86,7 @@ class Collector:
                 'change_rate' : '전일종가대비변화량'
             }
             df = df.drop(columns=['timestamp', 'prev_closing_price']).rename(columns=columns)
-            df = df.astype({'누적거래금액':np.int64, '누적거래량':np.int64})
+            df = df.astype({'누적거래금액':'int', '누적거래량':'int'})
             dtypes = self.check_dtypes(df)
             df = df.astype(dtypes)
             
@@ -106,7 +103,7 @@ class Collector:
                 'candle_acc_trade_volume' : '누적거래량'
             }
             df = df.drop(columns=['timestamp', 'unit']).rename(columns=columns)
-            df = df.astype({'누적거래금액':np.int64, '누적거래량':np.int64})
+            df = df.astype({'누적거래금액':'int', '누적거래량':'int'})
             dtypes = self.check_dtypes(df)
             df = df.astype(dtypes)
 
