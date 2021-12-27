@@ -2,6 +2,7 @@ import shutil
 import os
 from config.setting import *
 import time
+from util.util import time_print
 
 def backup_start(source, destination, file_ext):
     s = time.time()
@@ -26,7 +27,8 @@ def backup_start(source, destination, file_ext):
             shutil.copy(load_path, save_path)
             print(f'Copy {data_file_name} complete({idx+1}/{count_files})')
 
-    print(f'Backup Complete(Spent time : {(time.time() - s):.2f}초)')
+    print(f'Backup Complete', end=' ')
+    time_print(s, time.time())
 
 
 if __name__ == '__main__':
