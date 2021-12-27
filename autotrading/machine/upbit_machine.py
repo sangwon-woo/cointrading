@@ -8,7 +8,7 @@ import config.setting as st
 import uuid
 import hashlib
 import jwt
-from autotrading.data_engine.data_queue import ClosableQueue
+from autotrading.data.data_queue import ClosableQueue
 from multiprocessing import Process
 from urllib.parse import urlencode
 import asyncio
