@@ -1,6 +1,7 @@
 import multiprocessing as mp
 
-
+# 어차피 나중에는 모두 백그라운드 프로세스(daemon=True)가 될 수밖에 없음. 
+# 웹앱으로 만들어서 실시간 데이터 수신, 매매전략 실행, 매매 성과평가 등을 보여주자. 
 if __name__ == '__main__':
     while True:
         break
