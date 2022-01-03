@@ -279,3 +279,15 @@ class UpbitCollector:
                         break
 
                     old_df = old_df.append(df, ignore_index=True)
+
+
+class BithumbCollector:
+    pass
+
+
+class CoinoneCollector:
+    pass
+
+
+class KorbitCollector:
+    pass
