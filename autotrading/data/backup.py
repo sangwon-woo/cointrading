@@ -4,6 +4,7 @@ from config.setting import *
 import time
 from util.util import time_print
 
+
 def backup_start(source, destination, file_ext):
     s = time.time()
     data_files = [f for f in os.listdir(source) if f.endswith(file_ext)]
@@ -29,8 +30,3 @@ def backup_start(source, destination, file_ext):
 
     print(f'Backup Complete', end=' ')
     time_print(s, time.time())
-
-
-if __name__ == '__main__':
-    backup_start(DIR_UPBIT_DAILY_CANDLE, DIR_UPBIT_DAILY_CANDLE_BACKUP, '.arr')
-    backup_start(DIR_UPBIT_MINUTELY_CANDLE, DIR_UPBIT_MINUTELY_CANDLE_BACKUP, '.arr')
