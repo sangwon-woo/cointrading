@@ -15,6 +15,7 @@ upbit_daily_files = os.listdir(DIR_UPBIT_DAILY_CANDLE)
 if __name__ == '__main__':
     collector = UpbitCollector(QuotationAPI)
     last_hour = 0
+
     while True:
         market_code_in_upbit = collector.get_market_code()
         minutely_market_code_i_have = [m[:-4]
@@ -38,6 +39,7 @@ if __name__ == '__main__':
 
         # 1시간 마다 1분봉 다운받기
         now = datetime.datetime.now()
+        print('현재시각:', now)
         if now.hour != last_hour and now.minute == 0 and (0 <= now.second < 10):
             collect_data_with_multiprocess(
                 'minutely', collector, minutely_market_code_i_have, 4)
@@ -60,11 +62,11 @@ if __name__ == '__main__':
                                  DIR_UPBIT_MINUTELY_CANDLE_BACKUP, '.arr')
                     break
                 elif now.hour == 9 and now.minute < 30:
-                    delta = 1800 - ((now.minute * 60) + now.second)
+                    delta = 1800 - ((now.minute * 60) + now.second) + 1
                     print(f'일봉 데이터 업데이트 전 {delta}초 동안 잠자기')
                     time.sleep(delta)
         else:
             now = datetime.datetime.now()
-            delta = 3600 - ((now.minute * 60) + now.second)
+            delta = 3600 - ((now.minute * 60) + now.second) + 1
             print(f'1분봉 데이터 업데이트 전 {delta}초 동안 잠자기')
             time.sleep(delta)
