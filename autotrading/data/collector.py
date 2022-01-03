@@ -151,8 +151,7 @@ class UpbitCollector:
 
         for market in markets:
             s = time.time()
-            load_dir = DIR_UPBIT_MINUTELY_CANDLE + f'\\{market}.arr'
-            save_dir = DIR_UPBIT_MINUTELY_CANDLE + f'\\{market}.arr'
+            load_dir = save_dir = DIR_UPBIT_MINUTELY_CANDLE + f'\\{market}.arr'
 
             old_df = pd.read_feather(load_dir)
             first_time = old_df.loc[0, '시각_utc']
@@ -230,8 +229,7 @@ class UpbitCollector:
 
         for market in markets:
             s = time.time()
-            load_dir = DIR_UPBIT_DAILY_CANDLE + f'\\{market}.arr'
-            save_dir = DIR_UPBIT_DAILY_CANDLE + f'\\{market}.arr'
+            load_dir = save_dir = DIR_UPBIT_DAILY_CANDLE + f'\\{market}.arr'
 
             old_df = pd.read_feather(load_dir)
             first_time = old_df.loc[0, '시각_utc']
