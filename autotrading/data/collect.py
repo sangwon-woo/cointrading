@@ -1,5 +1,7 @@
 import multiprocessing as mp
 import random
+import time
+from util.util import time_print
 
 
 def get_partial_list(code_list, cpu_count):
@@ -23,6 +25,8 @@ def get_partial_list(code_list, cpu_count):
 def collect_data_with_multiprocess(type, collector, market_code_i_have, cpu_count):
     assert type in ['daily', 'minutely'], 'Wrong Type!'
 
+    s = time.time()
+
     processes = []
 
     if type == 'daily':
@@ -37,9 +41,13 @@ def collect_data_with_multiprocess(type, collector, market_code_i_have, cpu_coun
                 target=collector.collect_minutely_data_until_now, args=(code,)
             )
             processes.append(proc)
-
     for p in processes:
         p.start()
 
     for p in processes:
         p.join()
+
+    e = time.time()
+
+    print(f'{type} 업데이트에 총 소요된 시간 =>', end=' ')
+    time_print(s, e)
