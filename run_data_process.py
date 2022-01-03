@@ -42,8 +42,7 @@ if __name__ == '__main__':
             collect_data_with_multiprocess(
                 'minutely', collector, minutely_market_code_i_have, 4)
             last_hour = now.hour
-            print(now, '=> 1분봉 업데이트 시작', end=' ')
-            print('1분봉 업데이트 완료')
+            print(f'{now} => 1분봉 업데이트 완료')
 
         if now.hour == 9:
             # 매일 오전 9시 30분에 일봉데이터 다운받기
@@ -52,8 +51,7 @@ if __name__ == '__main__':
                 if now.hour == 9 and now.minute == 30 and (0 <= now.second < 10):
                     collect_data_with_multiprocess(
                         'daily', collector, daily_market_code_i_have, 4)
-                    print(now, '=> 일봉 업데이트 시작 및', end=' ')
-                    print('일봉 업데이트 완료')
+                    print(f'{now} => 일봉 업데이트 완료')
 
                     # 이후 데이터 백업하기
                     backup_start(DIR_UPBIT_DAILY_CANDLE,
@@ -61,9 +59,11 @@ if __name__ == '__main__':
                     backup_start(DIR_UPBIT_MINUTELY_CANDLE,
                                  DIR_UPBIT_MINUTELY_CANDLE_BACKUP, '.arr')
                     break
-                else:
-                    time.sleep(10)
+                elif now.hour == 9 and now.minute < 30:
+                    delta = 1800 - ((now.minute * 60) + now.second)
+                    print(f'일봉 데이터 업데이트 전 {delta}초 동안 잠자기')
+                    time.sleep(delta)
         else:
             delta = 3600 - ((now.minute * 60) + now.second)
-            print(f'{delta}초 동안 잠자기')
+            print(f'1분봉 데이터 업데이트 전 {delta}초 동안 잠자기')
             time.sleep(delta)

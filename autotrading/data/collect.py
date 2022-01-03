@@ -29,6 +29,8 @@ def collect_data_with_multiprocess(type, collector, market_code_i_have, cpu_coun
 
     processes = []
 
+    print(f'{type} 데이터 업데이트 시작')
+
     if type == 'daily':
         for code in get_partial_list(market_code_i_have, cpu_count):
             proc = mp.Process(
