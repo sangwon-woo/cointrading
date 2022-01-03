@@ -1,30 +1,30 @@
-from autotrading.data.collector import Collector
-import autotrading.machine.upbit_machine as m
+
 import os
 import multiprocessing as mp
 import random
 import datetime
+import pandas as pd
+from autotrading.data.collector import UpbitCollector
+from autotrading.machine.upbit_machine import QuotationAPI
+from config.setting import *
 
 
-class UpbitAPIException(Exception):
-    pass
-
-
-minutely = os.listdir('D:\\coin_database\\domestic\\upbit\\minutely')
-daily = os.listdir('D:\\coin_database\\domestic\\upbit\\daily')
+upbit_minutely_files = os.listdir(DIR_UPBIT_MINUTELY_CANDLE)
+upbit_daily_files = os.listdir(DIR_UPBIT_DAILY_CANDLE)
 
 if __name__ == '__main__':
+    collector = UpbitCollector(QuotationAPI)
+
     while True:
-
-        collector = Collector(m.QuotationAPI)
         krw_market_code = collector.get_market_code()
-
-        existing_market = [m[:-4] for m in minutely if m.endswith('arr')]
+        existing_market = [m[:-4]
+                           for m in upbit_minutely_files if m.endswith('arr')]
         random.shuffle(existing_market)
 
         if set(krw_market_code) != set(existing_market):
             print('시장 코드가 다름')
-            exit()
+            # 상장 종목은 데이터를 다운 받고
+            # 상폐 종목은 데이터를 백업한다.
 
         first_idx = len(existing_market) // 3
         second_idx = first_idx * 2
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         # time.sleep(3600)
         break
 
-    existing_market = [m[:-4] for m in daily if m.endswith('arr')]
+    existing_market = [m[:-4] for m in upbit_daily_files if m.endswith('arr')]
     random.shuffle(existing_market)
 
     if set(krw_market_code) != set(existing_market):
