@@ -1,10 +1,10 @@
 
 import os
-import multiprocessing as mp
-import random
 import datetime
-import pandas as pd
+import time
 from autotrading.data.collector import UpbitCollector
+from autotrading.data.collect import collect_data_with_multiprocess
+from autotrading.data.backup import backup_start
 from autotrading.machine.upbit_machine import QuotationAPI
 from config.setting import *
 
@@ -14,76 +14,56 @@ upbit_daily_files = os.listdir(DIR_UPBIT_DAILY_CANDLE)
 
 if __name__ == '__main__':
     collector = UpbitCollector(QuotationAPI)
-
+    last_hour = 0
     while True:
-        krw_market_code = collector.get_market_code()
-        existing_market = [m[:-4]
-                           for m in upbit_minutely_files if m.endswith('arr')]
-        random.shuffle(existing_market)
+        market_code_in_upbit = collector.get_market_code()
+        minutely_market_code_i_have = [m[:-4]
+                                       for m in upbit_minutely_files if m.endswith('arr')]
+        daily_market_code_i_have = [m[:-4]
+                                    for m in upbit_daily_files if m.endswith('arr')]
 
-        if set(krw_market_code) != set(existing_market):
-            print('시장 코드가 다름')
-            # 상장 종목은 데이터를 다운 받고
-            # 상폐 종목은 데이터를 백업한다.
+        if set(market_code_in_upbit) != set(minutely_market_code_i_have):
+            print('업비트 종목들과 저장된 종목들이 서로 다름')
+            new_code = set(market_code_in_upbit) - \
+                set(minutely_market_code_i_have)
+            delete_code = set(minutely_market_code_i_have) - \
+                set(market_code_in_upbit)
 
-        first_idx = len(existing_market) // 3
-        second_idx = first_idx * 2
+            if new_code:
+                collector.collect_daily_all_data(list(new_code))
+                collector.collect_minutely_all_data(list(new_code))
+            if delete_code:
+                # TODO :상폐된 종목 백업하는 메소드 만들기
+                pass
 
-        first_market = existing_market[:first_idx]
-        second_market = existing_market[first_idx:second_idx]
-        third_market = existing_market[second_idx:]
+        # 1시간 마다 1분봉 다운받기
+        now = datetime.datetime.now()
+        if now.hour != last_hour and now.minute == 0 and (0 <= now.second < 10):
+            collect_data_with_multiprocess(
+                'minutely', collector, minutely_market_code_i_have, 4)
+            last_hour = now.hour
+            print(now, '=> 1분봉 업데이트 시작', end=' ')
+            print('1분봉 업데이트 완료')
 
-        processes = []
+        if now.hour == 9:
+            # 매일 오전 9시 30분에 일봉데이터 다운받기
+            while True:
+                now = datetime.datetime.now()
+                if now.hour == 9 and now.minute == 30 and (0 <= now.second < 10):
+                    collect_data_with_multiprocess(
+                        'daily', collector, daily_market_code_i_have, 4)
+                    print(now, '=> 일봉 업데이트 시작 및', end=' ')
+                    print('일봉 업데이트 완료')
 
-        proc1 = mp.Process(
-            target=collector.collect_minutely_data_until_now, args=(first_market,))
-        proc2 = mp.Process(
-            target=collector.collect_minutely_data_until_now, args=(second_market,))
-        proc3 = mp.Process(
-            target=collector.collect_minutely_data_until_now, args=(third_market,))
-
-        processes.append(proc1)
-        processes.append(proc2)
-        processes.append(proc3)
-
-        for p in processes:
-            p.start()
-
-        for p in processes:
-            p.join()
-
-        # time.sleep(3600)
-        break
-
-    existing_market = [m[:-4] for m in upbit_daily_files if m.endswith('arr')]
-    random.shuffle(existing_market)
-
-    if set(krw_market_code) != set(existing_market):
-        print('시장 코드가 다름')
-        exit()
-
-    first_idx = len(existing_market) // 3
-    second_idx = first_idx * 2
-
-    first_market = existing_market[:first_idx]
-    second_market = existing_market[first_idx:second_idx]
-    third_market = existing_market[second_idx:]
-
-    processes = []
-
-    proc1 = mp.Process(
-        target=collector.collect_daily_data_until_now, args=(first_market,))
-    proc2 = mp.Process(
-        target=collector.collect_daily_data_until_now, args=(second_market,))
-    proc3 = mp.Process(
-        target=collector.collect_daily_data_until_now, args=(third_market,))
-
-    processes.append(proc1)
-    processes.append(proc2)
-    processes.append(proc3)
-
-    for p in processes:
-        p.start()
-
-    for p in processes:
-        p.join()
+                    # 이후 데이터 백업하기
+                    backup_start(DIR_UPBIT_DAILY_CANDLE,
+                                 DIR_UPBIT_DAILY_CANDLE_BACKUP, '.arr')
+                    backup_start(DIR_UPBIT_MINUTELY_CANDLE,
+                                 DIR_UPBIT_MINUTELY_CANDLE_BACKUP, '.arr')
+                    break
+                else:
+                    time.sleep(10)
+        else:
+            delta = 3600 - ((now.minute * 60) + now.second)
+            print(f'{delta}초 동안 잠자기')
+            time.sleep(delta)
