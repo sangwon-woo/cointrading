@@ -1,5 +1,4 @@
 import requests as rq
-from requests.api import head
 import websockets
 import pandas as pd
 import time
@@ -8,7 +7,6 @@ import config.setting as st
 import uuid
 import hashlib
 import jwt
-from autotrading.data.data_queue import ClosableQueue
 from multiprocessing import Process
 from urllib.parse import urlencode
 import asyncio
@@ -60,6 +58,7 @@ class ExchangeAPI(UpbitMachine):
         - 입출금 현황 : 입출금 현황 및 블록 상태 조회
         - API 키 리스트 조회 : API 키 목록 및 만료 일자 조회
     """
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -69,15 +68,15 @@ class ExchangeAPI(UpbitMachine):
         query_hash = m.hexdigest()
 
         payload = {
-            'access_key' : self.ACCESS_KEY,
-            'nonce' : str(uuid.uuid4()),
-            'query_hash' : query_hash,
-            'query_hash_alg' : 'SHA512'
+            'access_key': self.ACCESS_KEY,
+            'nonce': str(uuid.uuid4()),
+            'query_hash': query_hash,
+            'query_hash_alg': 'SHA512'
         }
 
         jwt_token = jwt.encode(payload, self.SECRET_KEY)
         authorize_token = f'Bearer {jwt_token}'
-        headers = {"Authorization":authorize_token}
+        headers = {"Authorization": authorize_token}
 
         return headers
 
@@ -88,22 +87,22 @@ class ExchangeAPI(UpbitMachine):
 
         url = self.BASE_API_URL + '/accounts'
         payload = {
-            'access_key' : self.ACCESS_KEY,
-            'nonce' : str(uuid.uuid4())
+            'access_key': self.ACCESS_KEY,
+            'nonce': str(uuid.uuid4())
         }
 
         jwt_token = jwt.encode(payload, self.SECRET_KEY)
         authorization_token = 'Bearer {}'.format(jwt_token)
-        headers = {'Authorization' : authorization_token}
+        headers = {'Authorization': authorization_token}
 
         res = rq.get(url, headers=headers).json()
 
         return res
 
-    def get_orders_chance(self, market:str='KRW-BTC'):
+    def get_orders_chance(self, market: str = 'KRW-BTC'):
         """
         마켓별 주문 가능 정보를 확인
-        
+
         Parameters
         ----------
         market : str
@@ -112,20 +111,20 @@ class ExchangeAPI(UpbitMachine):
 
         url = self.BASE_API_URL + '/orders/chance'
         query = {
-            'market' : market
+            'market': market
         }
         query_string = urlencode(query).encode()
-        
+
         headers = self.get_headers(query_string)
 
         res = rq.get(url, params=query, headers=headers).json()
 
         return res
 
-    def get_order(self, uuid:str):
+    def get_order(self, uuid: str):
         """
         주문 UUID를 통해 개별 주문건을 조회
-        
+
         Parameters
         ----------
         uuid : str
@@ -134,20 +133,20 @@ class ExchangeAPI(UpbitMachine):
 
         url = self.BASE_API_URL + '/order'
         query = {
-            'uuid' : uuid
+            'uuid': uuid
         }
         query_string = urlencode(query).encode()
-        
+
         headers = self.get_headers(query_string)
 
         res = rq.get(url, params=query, headers=headers).json()
 
         return res
 
-    def get_order_list(self, uuids:list, **kwargs):
+    def get_order_list(self, uuids: list, **kwargs):
         """
         주문 UUID를 통해 개별 주문건을 조회
-        
+
         Parameters
         ----------
         uuids : list
@@ -181,10 +180,10 @@ class ExchangeAPI(UpbitMachine):
 
         return res
 
-    def delete_order(self, uuid:str):
+    def delete_order(self, uuid: str):
         """
         주문 UUID를 통해 해당 주문에 대한 취소 접수
-        
+
         Parameters
         ----------
         uuid : list
@@ -192,7 +191,7 @@ class ExchangeAPI(UpbitMachine):
         """
         url = self.BASE_API_URL + '/order'
         query = {
-            'uuid' : uuid
+            'uuid': uuid
         }
         query_string = urlencode(query).encode()
 
@@ -202,10 +201,10 @@ class ExchangeAPI(UpbitMachine):
 
         return res
 
-    def post_order(self, market:str, side:str, volume:str, price:str, ord_type:str):
+    def post_order(self, market: str, side: str, volume: str, price: str, ord_type: str):
         """
         주문 요청
-        
+
         Parameters
         ----------
         market : str
@@ -219,15 +218,15 @@ class ExchangeAPI(UpbitMachine):
         ord_type : str
             주문 타입. limit(지정가 주문), price(시장가 매수 주문), market(시장가 매도 주문)
         """
-        
+
         url = self.BASE_API_URL + '/orders'
 
         query = {
-            'market' : market,
-            'side' : side,
-            'volume' : volume,
-            'price' : price,
-            'ord_type' : ord_type
+            'market': market,
+            'side': side,
+            'volume': volume,
+            'price': price,
+            'ord_type': ord_type
         }
         query_string = urlencode(query).encode()
 
@@ -294,16 +293,17 @@ class QuotationAPI(UpbitMachine):
     5. 시세 호가 정보 조회
         - 호가 정보 조회 : 요청 당시 종목의 호가 정보 조회(1호가부터 15호가까지)
     """
+
     def __init__(self) -> None:
         super().__init__()
         self.headers = {
-            'Accept' : 'application/json'
+            'Accept': 'application/json'
         }
 
     def get_market_code(self, is_details=False) -> pd.DataFrame:
         """
         업비트에서 거래 가능한 마켓 목록 조회
-        
+
         Parameters
         ----------
         is_details : Bool
@@ -313,7 +313,7 @@ class QuotationAPI(UpbitMachine):
         is_details = 'false' if is_details == False else 'true'
         url = self.BASE_API_URL + '/market/all?isDetails={}'.format(is_details)
 
-        ### try - except
+        # try - except
         res = rq.get(url, headers=self.headers)
         time.sleep(0.1)
 
@@ -326,7 +326,7 @@ class QuotationAPI(UpbitMachine):
         """
         특정 화폐의 분봉 조회
         ----------
-        
+
         Parameters
         ----------
         unit : int
@@ -352,20 +352,20 @@ class QuotationAPI(UpbitMachine):
 
         url = base_url + query
 
-        ### try - except
+        # try - except
         res = rq.get(url, headers=self.headers).json()
         time.sleep(0.1)
 
         for i in range(len(res)):
             dict_row = res[i]
             df = df.append(dict_row, ignore_index=True)
-        
+
         return df
 
     def get_day_candle(self, market='KRW-BTC', to=None, count=1, converting_price_unit=None) -> pd.DataFrame:
         """
         특정 화폐의 일봉 조회
-        
+
         Parameters
         ----------
         market : string
@@ -384,9 +384,11 @@ class QuotationAPI(UpbitMachine):
 
         if to:
             if converting_price_unit:
-                print(f'{market} => {to}보다 이전 일봉 데이터 및 {converting_price_unit}로 환산하여 조회')
+                print(
+                    f'{market} => {to}보다 이전 일봉 데이터 및 {converting_price_unit}로 환산하여 조회')
                 to = to.replace(' ', '%20').replace(':', '%3A')
-                query = 'market={}&to={}&count={}&convertingPriceUnit={}'.format(market, to, count, converting_price_unit)
+                query = 'market={}&to={}&count={}&convertingPriceUnit={}'.format(
+                    market, to, count, converting_price_unit)
             else:
                 print(f'{market} => {to}보다 이전 일봉 데이터 조회')
                 to = to.replace(' ', '%20').replace(':', '%3A')
@@ -394,26 +396,27 @@ class QuotationAPI(UpbitMachine):
         else:
             if converting_price_unit:
                 print(f'{market} => {converting_price_unit}로 환산하여 조회')
-                query = 'market={}&count={}&convertingPriceUnit={}'.format(market, count, converting_price_unit)
+                query = 'market={}&count={}&convertingPriceUnit={}'.format(
+                    market, count, converting_price_unit)
             else:
                 query = 'market={}&count={}'.format(market, count)
 
         url = base_url + query
 
-        ### try - except
+        # try - except
         res = rq.get(url, headers=self.headers).json()
         time.sleep(0.1)
 
         for i in range(len(res)):
             dict_row = res[i]
             df = df.append(dict_row, ignore_index=True)
-        
+
         return df
 
     def get_week_candle(self, market='KRW-BTC', to=None, count=1) -> pd.DataFrame:
         """
         특정 화폐의 주봉 조회
-        
+
         Parameters
         ----------
         market : string
@@ -437,20 +440,20 @@ class QuotationAPI(UpbitMachine):
 
         url = base_url + query
 
-        ### try - except
+        # try - except
         res = rq.get(url, headers=self.headers).json()
         time.sleep(0.1)
 
         for i in range(len(res)):
             dict_row = res[i]
             df = df.append(dict_row, ignore_index=True)
-        
-        return df        
+
+        return df
 
     def get_month_candle(self, market='KRW-BTC', to=None, count=1) -> pd.DataFrame:
         """
         특정 화폐의 월봉 조회
-        
+
         Parameters
         ----------
         market : string
@@ -474,15 +477,15 @@ class QuotationAPI(UpbitMachine):
 
         url = base_url + query
 
-        ### try - except
+        # try - except
         res = rq.get(url, headers=self.headers).json()
         time.sleep(0.1)
 
         for i in range(len(res)):
             dict_row = res[i]
             df = df.append(dict_row, ignore_index=True)
-        
-        return df 
+
+        return df
 
     def get_transactions(self, market='KRW-BTC', to=None, count=1, cursor=None, days_ago=None):
         pass
@@ -501,10 +504,10 @@ class QuotationAPI(UpbitMachine):
         else:
             params = markets[0]
             query = 'markets={}'.format(params)
-        
+
         url = base_url + query
 
-        ### try - except
+        # try - except
         res = rq.get(url, headers=self.headers).json()
         time.sleep(0.1)
 
@@ -520,7 +523,8 @@ class QuotationAPI(UpbitMachine):
             temp_df = pd.DataFrame()
 
             for orderbook_units_idx in range(len(orderbook_units)):
-                temp_df = temp_df.append(orderbook_units[orderbook_units_idx], ignore_index=True)
+                temp_df = temp_df.append(
+                    orderbook_units[orderbook_units_idx], ignore_index=True)
 
             temp_df['market'] = market
             temp_df['timestamp'] = timestamp
@@ -531,7 +535,6 @@ class QuotationAPI(UpbitMachine):
             df = df.reset_index(drop=True)
 
         return df
-
 
 
 class WebsocketAPI(UpbitMachine):
@@ -582,23 +585,20 @@ class WebsocketAPI(UpbitMachine):
 
     """
 
-
     def __init__(self) -> None:
         super().__init__()
         self.BASE_WEBSOCKET_URL = 'wss://api.upbit.com/websocket/v1'
         self.subscribe_format = None
-        self.data_queue = ClosableQueue()
 
+    def set_subscribe_format(self, *type_field, ticket_field='UNIQUE_TICKET', format_field=None):
 
-    def set_subscribe_format(self, *type_field, ticket_field='UNIQUE_TICKET', format_field=None ):
-        
         _ticket = {
-            'ticket' : ticket_field if ticket_field != 'test' else 'test '
+            'ticket': ticket_field if ticket_field != 'test' else 'test '
         }
         if format_field:
             assert format_field != 'SIMPLE' 'Wrong format code'
             _format = {
-                'format' : format_field
+                'format': format_field
             }
 
             subscribe_format = [
@@ -627,8 +627,7 @@ class WebsocketAPI(UpbitMachine):
                 data = await ws.recv()
                 data = json.loads(data)
                 self.data_queue.put(data)
-                
-    
+
     def get_data(self):
         count = 0
         serial = 0
@@ -637,7 +636,7 @@ class WebsocketAPI(UpbitMachine):
         while not self.data_queue.empty():
             data = self.data_queue.get()
             if count == 1000:
-                df.to_csv(self.DIR_DATABASE + '\\data_{}.csv'.format(serial))        
+                df.to_csv(self.DIR_DATABASE + '\\data_{}.csv'.format(serial))
                 serial += 1
                 df = pd.DataFrame()
                 count = 0
@@ -648,6 +647,6 @@ class WebsocketAPI(UpbitMachine):
 
     def set_process(self):
         self.proc = Process(target=self.get_data, name='Data Consumer')
-    
+
     def run_process(self):
         self.proc.start()
