@@ -64,6 +64,7 @@ if __name__ == '__main__':
                     print(f'일봉 데이터 업데이트 전 {delta}초 동안 잠자기')
                     time.sleep(delta)
         else:
+            now = datetime.datetime.now()
             delta = 3600 - ((now.minute * 60) + now.second)
             print(f'1분봉 데이터 업데이트 전 {delta}초 동안 잠자기')
             time.sleep(delta)
