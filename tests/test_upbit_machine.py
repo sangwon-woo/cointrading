@@ -1,5 +1,5 @@
 import websockets
-import asyncio 
+import asyncio
 import json
 import requests
 import multiprocessing as mp
@@ -19,16 +19,22 @@ for res in response.json():
     ticker = res['market']
     if ticker.startswith('KRW'):
         ticker_list.append(ticker)
+type_field = [
+    {"type": "trade", "codes": ["KRW-BTC"]},
+    # {"type":"orderbook","codes":["KRW-ETH"]},
+    # {"type":"ticker", "codes":["KRW-EOS"]}
+]
 
 df = pd.DataFrame()
+
 
 async def upbit_ws_client():
     global df
     uri = "wss://api.upbit.com/websocket/v1"
 
     async with websockets.connect(uri) as websocket:
-        subscribe_fmt = [ 
-            {"ticket":"UNIQUE_TICKET"},
+        subscribe_fmt = [
+            {"ticket": "UNIQUE_TICKET"},
             # {
             #     "type": "ticker",
             #     "codes": ticker_list,
@@ -37,7 +43,7 @@ async def upbit_ws_client():
             {
                 "type": "trade",
                 # "codes": ticker_list,
-                "codes" : ['KRW-BTC'],
+                "codes": ['KRW-BTC'],
                 "isOnlyRealtime": True
             },
             # {
@@ -49,7 +55,7 @@ async def upbit_ws_client():
         ]
         subscribe_data = json.dumps(subscribe_fmt)
         await websocket.send(subscribe_data)
-        
+
         a = 0
         while True:
             data = await websocket.recv()
@@ -57,6 +63,7 @@ async def upbit_ws_client():
             # df = df.append(data, ignore_index=True)
             # a += 1
             print(data)
+
 
 async def main():
     await upbit_ws_client()
