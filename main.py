@@ -1,4 +1,5 @@
 import multiprocessing as mp
+import datetime
 from autotrading.strategy import Strategy
 from autotrading.trading import Trading
 from autotrading.data.collector import Collector
@@ -7,9 +8,7 @@ from autotrading.data.collector import Collector
 # 웹앱으로 만들어서 실시간 데이터 수신, 매매전략 실행, 매매 성과평가 등을 보여주자.
 
 if __name__ == '__main__':
-    while True:
-        break
-    # 데이터를 실시간으로 받기
+    pass
 
     # 실시간 데이터를 db와 arr 파일로 저장하기
 

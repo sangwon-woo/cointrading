@@ -3,18 +3,11 @@ import autotrading.machine.upbit_machine as m
 import os
 import multiprocessing as mp
 import random
-import time
+import datetime
 
 
 class UpbitAPIException(Exception):
     pass
-
-type_field = [
-    {"type":"trade","codes":["KRW-BTC"]},
-    # {"type":"orderbook","codes":["KRW-ETH"]},
-    # {"type":"ticker", "codes":["KRW-EOS"]}
-]
-
 
 
 minutely = os.listdir('D:\\coin_database\\domestic\\upbit\\minutely')
@@ -42,9 +35,12 @@ if __name__ == '__main__':
 
         processes = []
 
-        proc1 = mp.Process(target=collector.collect_minutely_data_until_now, args=(first_market,))
-        proc2 = mp.Process(target=collector.collect_minutely_data_until_now, args=(second_market,))
-        proc3 = mp.Process(target=collector.collect_minutely_data_until_now, args=(third_market,))
+        proc1 = mp.Process(
+            target=collector.collect_minutely_data_until_now, args=(first_market,))
+        proc2 = mp.Process(
+            target=collector.collect_minutely_data_until_now, args=(second_market,))
+        proc3 = mp.Process(
+            target=collector.collect_minutely_data_until_now, args=(third_market,))
 
         processes.append(proc1)
         processes.append(proc2)
@@ -75,9 +71,12 @@ if __name__ == '__main__':
 
     processes = []
 
-    proc1 = mp.Process(target=collector.collect_daily_data_until_now, args=(first_market,))
-    proc2 = mp.Process(target=collector.collect_daily_data_until_now, args=(second_market,))
-    proc3 = mp.Process(target=collector.collect_daily_data_until_now, args=(third_market,))
+    proc1 = mp.Process(
+        target=collector.collect_daily_data_until_now, args=(first_market,))
+    proc2 = mp.Process(
+        target=collector.collect_daily_data_until_now, args=(second_market,))
+    proc3 = mp.Process(
+        target=collector.collect_daily_data_until_now, args=(third_market,))
 
     processes.append(proc1)
     processes.append(proc2)
@@ -88,7 +87,3 @@ if __name__ == '__main__':
 
     for p in processes:
         p.join()
-
-    
-
-        
