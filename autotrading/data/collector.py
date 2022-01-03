@@ -4,13 +4,15 @@ import numpy as np
 from config.setting import *
 from dateutil.parser import parse
 
-class Collector:
+
+class UpbitCollector:
     def __init__(self, machine):
         self.machine = machine()
 
     def check_dtypes(self, df):
         col_dtypes = {}
-        list_int = ['int', 'int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32', 'int64', 'uint64']
+        list_int = ['int', 'int8', 'uint8', 'int16',
+                    'uint16', 'int32', 'uint32', 'int64', 'uint64']
         list_float = ['float', 'float32', 'float64']
 
         for col in df.columns:
@@ -67,10 +69,11 @@ class Collector:
         last_time = ' '.join(last_time.split('T'))
 
         return last_time
-        
+
     def get_market_code(self):
         market = self.machine.get_market_code()
-        krw_market_code = [c for c in market['market'].to_list() if c.startswith('KRW')]
+        krw_market_code = [
+            c for c in market['market'].to_list() if c.startswith('KRW')]
 
         return krw_market_code
 
@@ -84,33 +87,34 @@ class Collector:
 
         if type == 'daily':
             columns = {
-                'market' : '시장-코인',
-                'candle_date_time_utc' : '시각_utc',
-                'candle_date_time_kst' : '시각_kst',
-                'opening_price' : '시가',
-                'high_price' : '고가',
-                'low_price' : '저가',
-                'trade_price' : '종가',
-                'candle_acc_trade_price' : '누적거래금액',
-                'candle_acc_trade_volume' : '누적거래량',
-                'change_price' : '전일종가대비변화금액',
-                'change_rate' : '전일종가대비변화량'
+                'market': '시장-코인',
+                'candle_date_time_utc': '시각_utc',
+                'candle_date_time_kst': '시각_kst',
+                'opening_price': '시가',
+                'high_price': '고가',
+                'low_price': '저가',
+                'trade_price': '종가',
+                'candle_acc_trade_price': '누적거래금액',
+                'candle_acc_trade_volume': '누적거래량',
+                'change_price': '전일종가대비변화금액',
+                'change_rate': '전일종가대비변화량'
             }
-            df = df.drop(columns=['timestamp', 'prev_closing_price']).rename(columns=columns)
+            df = df.drop(columns=['timestamp', 'prev_closing_price']).rename(
+                columns=columns)
             dtypes = self.check_dtypes(df)
             df = df.astype(dtypes)
-            
+
         elif type == 'minutely':
             columns = {
-                'market' : '시장-코인',
-                'candle_date_time_utc' : '시각_utc',
-                'candle_date_time_kst' : '시각_kst',
-                'opening_price' : '시가',
-                'high_price' : '고가',
-                'low_price' : '저가',
-                'trade_price' : '종가',
-                'candle_acc_trade_price' : '누적거래금액',
-                'candle_acc_trade_volume' : '누적거래량'
+                'market': '시장-코인',
+                'candle_date_time_utc': '시각_utc',
+                'candle_date_time_kst': '시각_kst',
+                'opening_price': '시가',
+                'high_price': '고가',
+                'low_price': '저가',
+                'trade_price': '종가',
+                'candle_acc_trade_price': '누적거래금액',
+                'candle_acc_trade_volume': '누적거래량'
             }
             df = df.drop(columns=['timestamp', 'unit']).rename(columns=columns)
             dtypes = self.check_dtypes(df)
@@ -118,19 +122,21 @@ class Collector:
 
         return df
 
-    def collect_minutely_all_data(self, markets:list):
-        
+    def collect_minutely_all_data(self, markets: list):
+
         for market in markets:
             s = time.time()
             coin_df = pd.DataFrame()
             save_dir = DIR_UPBIT_MINUTELY_CANDLE + f'\\{market}.arr'
-            latest_df = self.machine.get_minute_candle(unit=1, market=market, count=200)
+            latest_df = self.machine.get_minute_candle(
+                unit=1, market=market, count=200)
 
             last_time = self.get_last_time(latest_df)
             coin_df = coin_df.append(latest_df, ignore_index=True)
-            
+
             while True:
-                df = self.machine.get_minute_candle(unit=1, market=market, to=last_time, count=200)
+                df = self.machine.get_minute_candle(
+                    unit=1, market=market, to=last_time, count=200)
                 if len(df.index) == 0:
                     break
                 last_time = self.get_last_time(df)
@@ -141,7 +147,7 @@ class Collector:
             coin_df.to_feather(save_dir)
             print(f'{market} => Delta', time.time() - s)
 
-    def collect_minutely_data_until_now(self, markets:list):
+    def collect_minutely_data_until_now(self, markets: list):
 
         for market in markets:
             s = time.time()
@@ -152,18 +158,21 @@ class Collector:
             first_time = old_df.loc[0, '시각_utc']
             old_df = old_df.loc[1:, :]
 
-            latest_df = self.machine.get_minute_candle(unit=1, market=market, count=200)
+            latest_df = self.machine.get_minute_candle(
+                unit=1, market=market, count=200)
             latest_df = self.set_columns_dtypes(latest_df, type='minutely')
             last_time = self.get_last_time(latest_df)
 
-            parsed_first_time, parsed_last_time = parse(first_time), parse(last_time)
-            
+            parsed_first_time, parsed_last_time = parse(
+                first_time), parse(last_time)
+
             if parsed_last_time <= parsed_first_time:
                 subset_df = latest_df[latest_df['시각_utc'] >= first_time]
                 old_df = old_df.append(subset_df, ignore_index=True)
 
                 old_df = self.set_columns_dtypes(old_df, type='minutely')
-                old_df = old_df.sort_values('시각_utc', ascending=False).reset_index(drop=True)
+                old_df = old_df.sort_values(
+                    '시각_utc', ascending=False).reset_index(drop=True)
 
                 old_df.to_feather(save_dir)
                 print(f'{market} => Delta', time.time() - s)
@@ -173,7 +182,8 @@ class Collector:
                 old_df = old_df.append(latest_df, ignore_index=True)
 
                 while True:
-                    df = self.machine.get_minute_candle(unit=1, market=market, to=last_time, count=200)
+                    df = self.machine.get_minute_candle(
+                        unit=1, market=market, to=last_time, count=200)
                     df = self.set_columns_dtypes(df, type='minutely')
                     last_time = self.get_last_time(df)
                     parsed_last_time = parse(last_time)
@@ -181,17 +191,19 @@ class Collector:
                     if parsed_last_time <= parsed_first_time:
                         subset_df = df[df['시각_utc'] >= first_time]
                         old_df = old_df.append(subset_df, ignore_index=True)
-                        
-                        old_df = self.set_columns_dtypes(old_df, type='minutely')
-                        old_df = old_df.sort_values('시각_utc', ascending=False).reset_index(drop=True)
+
+                        old_df = self.set_columns_dtypes(
+                            old_df, type='minutely')
+                        old_df = old_df.sort_values(
+                            '시각_utc', ascending=False).reset_index(drop=True)
 
                         old_df.to_feather(save_dir)
                         print(f'{market} => Delta', time.time() - s)
                         break
                     old_df = old_df.append(df, ignore_index=True)
 
-    def collect_daily_all_data(self, markets:list):
-        
+    def collect_daily_all_data(self, markets: list):
+
         for market in markets:
             s = time.time()
             coin_df = pd.DataFrame()
@@ -200,9 +212,10 @@ class Collector:
 
             last_time = self.get_last_time(latest_df)
             coin_df = coin_df.append(latest_df, ignore_index=True)
-            
+
             while True:
-                df = self.machine.get_day_candle(market=market, to=last_time, count=200)
+                df = self.machine.get_day_candle(
+                    market=market, to=last_time, count=200)
                 if len(df.index) == 0:
                     break
                 last_time = self.get_last_time(df)
@@ -213,7 +226,7 @@ class Collector:
             coin_df.to_feather(save_dir)
             print(f'{market} => Delta', time.time() - s)
 
-    def collect_daily_data_until_now(self, markets:list):
+    def collect_daily_data_until_now(self, markets: list):
 
         for market in markets:
             s = time.time()
@@ -228,14 +241,16 @@ class Collector:
             latest_df = self.set_columns_dtypes(latest_df, type='daily')
             last_time = self.get_last_time(latest_df)
 
-            parsed_first_time, parsed_last_time = parse(first_time), parse(last_time)
-            
+            parsed_first_time, parsed_last_time = parse(
+                first_time), parse(last_time)
+
             if parsed_last_time <= parsed_first_time:
                 subset_df = latest_df[latest_df['시각_utc'] >= first_time]
                 old_df = old_df.append(subset_df, ignore_index=True)
 
                 old_df = self.set_columns_dtypes(old_df, type='daily')
-                old_df = old_df.sort_values('시각_utc', ascending=False).reset_index(drop=True)
+                old_df = old_df.sort_values(
+                    '시각_utc', ascending=False).reset_index(drop=True)
 
                 old_df.to_feather(save_dir)
                 print(f'{market} => Delta', time.time() - s)
@@ -245,7 +260,8 @@ class Collector:
                 old_df = old_df.append(latest_df, ignore_index=True)
 
                 while True:
-                    df = self.machine.get_day_candle(market=market, to=last_time, count=200)
+                    df = self.machine.get_day_candle(
+                        market=market, to=last_time, count=200)
                     df = self.set_columns_dtypes(df, type='daily')
                     last_time = self.get_last_time(df)
                     parsed_last_time = parse(last_time)
@@ -255,11 +271,11 @@ class Collector:
                         old_df = old_df.append(subset_df, ignore_index=True)
 
                         old_df = self.set_columns_dtypes(old_df, type='daily')
-                        old_df = old_df.sort_values('시각_utc', ascending=False).reset_index(drop=True)
+                        old_df = old_df.sort_values(
+                            '시각_utc', ascending=False).reset_index(drop=True)
 
                         old_df.to_feather(save_dir)
                         print(f'{market} => Delta', time.time() - s)
                         break
 
-                    old_df = old_df.append(df, ignore_index=True)                
-
+                    old_df = old_df.append(df, ignore_index=True)
