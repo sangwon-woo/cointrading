@@ -650,3 +650,7 @@ class WebsocketAPI(UpbitMachine):
 
     def run_process(self):
         self.proc.start()
+
+
+class UpbitAPIException(Exception):
+    pass
