@@ -37,10 +37,13 @@ if __name__ == '__main__':
                 # TODO :상폐된 종목 백업하는 메소드 만들기
                 pass
 
-        # 1시간 마다 1분봉 다운받기
         now = datetime.datetime.now()
-        print('현재시각:', now)
+
+        # 1시간 마다 1분봉 다운받기
+        print('1분봉 업데이트 전 현재 시간:', now)
         if now.hour != last_hour and now.minute == 0 and (0 <= now.second < 10):
+            print('1분봉 업데이트 시작 시간:', now)
+            time.sleep(1)
             collect_data_with_multiprocess(
                 'minutely', collector, minutely_market_code_i_have, 4)
             last_hour = now.hour
@@ -50,7 +53,10 @@ if __name__ == '__main__':
             # 매일 오전 9시 30분에 일봉데이터 다운받기
             while True:
                 now = datetime.datetime.now()
+                print('일봉 업데이트 전 현재 시간:', now)
                 if now.hour == 9 and now.minute == 30 and (0 <= now.second < 10):
+                    print('일봉 업데이트 시작 시간:', now)
+                    time.sleep(1)
                     collect_data_with_multiprocess(
                         'daily', collector, daily_market_code_i_have, 4)
                     print(f'{now} => 일봉 업데이트 완료')
@@ -60,13 +66,15 @@ if __name__ == '__main__':
                                  DIR_UPBIT_DAILY_CANDLE_BACKUP, '.arr')
                     backup_start(DIR_UPBIT_MINUTELY_CANDLE,
                                  DIR_UPBIT_MINUTELY_CANDLE_BACKUP, '.arr')
+
                     break
+
                 elif now.hour == 9 and now.minute < 30:
                     delta = 1800 - ((now.minute * 60) + now.second) + 1
                     print(f'일봉 데이터 업데이트 전 {delta}초 동안 잠자기')
                     time.sleep(delta)
-        else:
-            now = datetime.datetime.now()
-            delta = 3600 - ((now.minute * 60) + now.second) + 1
-            print(f'1분봉 데이터 업데이트 전 {delta}초 동안 잠자기')
-            time.sleep(delta)
+
+        now = datetime.datetime.now()
+        delta = 3600 - ((now.minute * 60) + now.second) + 1
+        print(f'1분봉 데이터 업데이트 전 {delta}초 동안 잠자기')
+        time.sleep(delta)
