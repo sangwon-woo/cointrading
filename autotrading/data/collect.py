@@ -50,6 +50,3 @@ def collect_data_with_multiprocess(type, collector, market_code_i_have, cpu_coun
         p.join()
 
     e = time.time()
-
-    print(f'{type} 업데이트에 총 소요된 시간 =>', end=' ')
-    time_print(s, e)
