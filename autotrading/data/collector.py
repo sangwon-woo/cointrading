@@ -126,6 +126,7 @@ class UpbitCollector:
 
         for market in markets:
             s = time.time()
+            print(f'{market} = > ', end='')
             coin_df = pd.DataFrame()
             save_dir = DIR_UPBIT_MINUTELY_CANDLE + f'\\{market}.arr'
             latest_df = self.machine.get_minute_candle(
@@ -145,12 +146,13 @@ class UpbitCollector:
             coin_df = self.set_columns_dtypes(coin_df, type='minutely')
 
             coin_df.to_feather(save_dir)
-            print(f'{market} => Delta', time.time() - s)
+            print('Delta', time.time() - s)
 
     def collect_minutely_data_until_now(self, markets: list):
 
         for market in markets:
             s = time.time()
+            print(f'{market} = > ', end='')
             load_dir = save_dir = DIR_UPBIT_MINUTELY_CANDLE + f'\\{market}.arr'
 
             old_df = pd.read_feather(load_dir)
@@ -174,7 +176,7 @@ class UpbitCollector:
                     '시각_utc', ascending=False).reset_index(drop=True)
 
                 old_df.to_feather(save_dir)
-                print(f'{market} => Delta', time.time() - s)
+                print('Delta', time.time() - s)
                 continue
 
             else:
@@ -229,6 +231,7 @@ class UpbitCollector:
 
         for market in markets:
             s = time.time()
+            print(f'{market} = > ', end='')
             load_dir = save_dir = DIR_UPBIT_DAILY_CANDLE + f'\\{market}.arr'
 
             old_df = pd.read_feather(load_dir)
@@ -251,7 +254,7 @@ class UpbitCollector:
                     '시각_utc', ascending=False).reset_index(drop=True)
 
                 old_df.to_feather(save_dir)
-                print(f'{market} => Delta', time.time() - s)
+                print('Delta', time.time() - s)
                 continue
 
             else:

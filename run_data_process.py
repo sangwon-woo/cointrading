@@ -45,7 +45,7 @@ if __name__ == '__main__':
             print('1분봉 업데이트 시작 시간:', now)
             time.sleep(1)
             collect_data_with_multiprocess(
-                'minutely', collector, minutely_market_code_i_have, 4)
+                'minutely', collector, minutely_market_code_i_have, 9)
             last_hour = now.hour
             print(f'{now} => 1분봉 업데이트 완료')
 
@@ -58,7 +58,7 @@ if __name__ == '__main__':
                     print('일봉 업데이트 시작 시간:', now)
                     time.sleep(1)
                     collect_data_with_multiprocess(
-                        'daily', collector, daily_market_code_i_have, 4)
+                        'daily', collector, daily_market_code_i_have, 3)
                     print(f'{now} => 일봉 업데이트 완료')
 
                     # 이후 데이터 백업하기
