@@ -1,10 +1,12 @@
-"""
-기본적으로 전 종목 데이터를 쭉 훑는다.
-데이터는 1시간마다 업데이트한다.
-종목을 훑으면서 예비신호가 발생했는지 파악한다.
-예비신호가 발생하면 해당 전략을 실행한다.
+import os
+import pandas as pd
 
-"""
+BASE = 'D:\\coin_database\\domestic\\upbit\\daily\\'
+
+flist = os.listdir(BASE)
 
 if __name__ == "__main__":
-    pass
+    for f in flist:
+        df = pd.read_feather(BASE+f)
+        print(df.head())
+        break
