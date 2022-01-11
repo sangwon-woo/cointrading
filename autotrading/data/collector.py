@@ -64,8 +64,14 @@ class UpbitCollector:
 
         return col_dtypes
 
-    def get_last_time(self, df):
+    def get_last_time_exist(self, df):
         last_time = df.loc[df.shape[0]-1, '시각_utc']
+        last_time = ' '.join(last_time.split('T'))
+
+        return last_time
+
+    def get_last_time_new(self, df):
+        last_time = df.loc[df.shape[0]-1, 'candle_date_time_utc']
         last_time = ' '.join(last_time.split('T'))
 
         return last_time
@@ -132,7 +138,7 @@ class UpbitCollector:
             latest_df = self.machine.get_minute_candle(
                 unit=1, market=market, count=200)
 
-            last_time = self.get_last_time(latest_df)
+            last_time = self.get_last_time_new(latest_df)
             coin_df = coin_df.append(latest_df, ignore_index=True)
 
             while True:
@@ -140,7 +146,7 @@ class UpbitCollector:
                     unit=1, market=market, to=last_time, count=200)
                 if len(df.index) == 0:
                     break
-                last_time = self.get_last_time(df)
+                last_time = self.get_last_time_new(df)
                 coin_df = coin_df.append(df, ignore_index=True)
 
             coin_df = self.set_columns_dtypes(coin_df, type='minutely')
@@ -162,7 +168,7 @@ class UpbitCollector:
             latest_df = self.machine.get_minute_candle(
                 unit=1, market=market, count=200)
             latest_df = self.set_columns_dtypes(latest_df, type='minutely')
-            last_time = self.get_last_time(latest_df)
+            last_time = self.get_last_time_exist(latest_df)
 
             parsed_first_time, parsed_last_time = parse(
                 first_time), parse(last_time)
@@ -186,7 +192,7 @@ class UpbitCollector:
                     df = self.machine.get_minute_candle(
                         unit=1, market=market, to=last_time, count=200)
                     df = self.set_columns_dtypes(df, type='minutely')
-                    last_time = self.get_last_time(df)
+                    last_time = self.get_last_time_exist(df)
                     parsed_last_time = parse(last_time)
 
                     if parsed_last_time <= parsed_first_time:
@@ -211,7 +217,7 @@ class UpbitCollector:
             save_dir = DIR_UPBIT_DAILY_CANDLE + f'\\{market}.arr'
             latest_df = self.machine.get_day_candle(market=market, count=200)
 
-            last_time = self.get_last_time(latest_df)
+            last_time = self.get_last_time_new(latest_df)
             coin_df = coin_df.append(latest_df, ignore_index=True)
 
             while True:
@@ -219,7 +225,7 @@ class UpbitCollector:
                     market=market, to=last_time, count=200)
                 if len(df.index) == 0:
                     break
-                last_time = self.get_last_time(df)
+                last_time = self.get_last_time_new(df)
                 coin_df = coin_df.append(df, ignore_index=True)
 
             coin_df = self.set_columns_dtypes(coin_df, type='daily')
@@ -240,7 +246,7 @@ class UpbitCollector:
 
             latest_df = self.machine.get_day_candle(market=market, count=200)
             latest_df = self.set_columns_dtypes(latest_df, type='daily')
-            last_time = self.get_last_time(latest_df)
+            last_time = self.get_last_time_exist(latest_df)
 
             parsed_first_time, parsed_last_time = parse(
                 first_time), parse(last_time)
@@ -264,7 +270,7 @@ class UpbitCollector:
                     df = self.machine.get_day_candle(
                         market=market, to=last_time, count=200)
                     df = self.set_columns_dtypes(df, type='daily')
-                    last_time = self.get_last_time(df)
+                    last_time = self.get_last_time_exist(df)
                     parsed_last_time = parse(last_time)
 
                     if parsed_last_time <= parsed_first_time:

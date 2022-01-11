@@ -32,8 +32,9 @@ if __name__ == '__main__':
                 set(market_code_in_upbit)
 
             if new_code:
-                collector.collect_daily_all_data(list(new_code))
-                collector.collect_minutely_all_data(list(new_code))
+                # collector.collect_daily_all_data(list(new_code))
+                # collector.collect_minutely_all_data(list(new_code))
+                pass
             if delete_code:
                 # TODO :상폐된 종목 백업하는 메소드 만들기
                 pass
