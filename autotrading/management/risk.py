@@ -5,11 +5,11 @@
 
 class RiskManagement:
     def __init__(self) -> None:
-        self.total_capital = 0
+        self.total_asset = 0
         self.risk_percentage = 0
 
-    def set_total_capital(self, total_capital):
-        self.total_capital = total_capital
+    def set_total_asset(self, total_asset):
+        self.total_asset = total_asset
 
     def set_risk_percentage(self, risk_percentage):
         assert risk_percentage in [1, 2, 3], "Select box : 1%, 2%, 3%"
