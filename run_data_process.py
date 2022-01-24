@@ -8,7 +8,7 @@ from autotrading.data.backup import backup_start
 from autotrading.machine.upbit_machine import QuotationAPI
 from config.setting import *
 from util.util import time_print
-
+# schedule 모듈 사용하기
 
 upbit_minutely_files = os.listdir(DIR_UPBIT_MINUTELY_CANDLE)
 upbit_daily_files = os.listdir(DIR_UPBIT_DAILY_CANDLE)
