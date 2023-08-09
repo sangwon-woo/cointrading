@@ -1,0 +1,4 @@
+
+
+class UpbitDType:
+    pass
