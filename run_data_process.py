@@ -13,16 +13,16 @@ from util.util import time_print
 upbit_minutely_files = os.listdir(DIR_UPBIT_MINUTELY_CANDLE)
 upbit_daily_files = os.listdir(DIR_UPBIT_DAILY_CANDLE)
 
+
+
 if __name__ == '__main__':
     collector = UpbitCollector(QuotationAPI)
     last_hour = 0
 
     while True:
         market_code_in_upbit = collector.get_market_code()
-        minutely_market_code_i_have = [m[:-4]
-                                       for m in upbit_minutely_files if m.endswith('arr')]
-        daily_market_code_i_have = [m[:-4]
-                                    for m in upbit_daily_files if m.endswith('arr')]
+        minutely_market_code_i_have = [m[:-4] for m in upbit_minutely_files if m.endswith('arr')]
+        daily_market_code_i_have = [m[:-4] for m in upbit_daily_files if m.endswith('arr')]
 
         if set(market_code_in_upbit) != set(minutely_market_code_i_have):
             print('업비트 종목들과 저장된 종목들이 서로 다름')
