@@ -165,8 +165,7 @@ class UpbitCollector:
             first_time = old_df.loc[0, '시각_utc']
             old_df = old_df.loc[1:, :]
 
-            latest_df = self.machine.get_minute_candle(
-                unit=1, market=market, count=200)
+            latest_df = self.machine.get_minute_candle(unit=1, market=market, count=200)
             latest_df = self.set_columns_dtypes(latest_df, type='minutely')
             last_time = self.get_last_time_exist(latest_df)
 
