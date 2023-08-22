@@ -1,12 +1,16 @@
-import requests as rq
-import websockets
-import pandas as pd
+"""
+upbit machine
+"""
+
 import time
 import json
-import config.setting as st
 import uuid
 import hashlib
 import jwt
+import websockets
+import pandas as pd
+import requests as rq
+import config.setting as st
 from multiprocessing import Process
 from urllib.parse import urlencode
 import asyncio
@@ -92,7 +96,7 @@ class ExchangeAPI(UpbitMachine):
         }
 
         jwt_token = jwt.encode(payload, self.SECRET_KEY)
-        authorization_token = 'Bearer {}'.format(jwt_token)
+        authorization_token = f'Bearer {jwt_token}'
         headers = {'Authorization': authorization_token}
 
         res = rq.get(url, headers=headers).json()
@@ -317,10 +321,7 @@ class QuotationAPI(UpbitMachine):
         res = rq.get(url, headers=self.headers)
         time.sleep(0.1)
 
-        for dict_row in res.json():
-            df = df.append(dict_row, ignore_index=True)
-
-        return df
+        return res
 
     def get_minute_candle(self, unit=1, market='KRW-BTC', to=None, count=1) -> pd.DataFrame:
         """
@@ -356,11 +357,7 @@ class QuotationAPI(UpbitMachine):
         res = rq.get(url, headers=self.headers).json()
         time.sleep(0.1)
 
-        for i in range(len(res)):
-            dict_row = res[i]
-            df = df.append(dict_row, ignore_index=True)
-
-        return df
+        return pd.DataFrame(res)
 
     def get_day_candle(self, market='KRW-BTC', to=None, count=1, converting_price_unit=None) -> pd.DataFrame:
         """
