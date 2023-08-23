@@ -135,7 +135,6 @@ conf/*
 
 config/config.ini
 dev.py
-test*.*
 data/*
 *.arrx
 *.arr
